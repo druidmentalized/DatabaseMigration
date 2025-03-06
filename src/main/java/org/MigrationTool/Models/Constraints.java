@@ -1,5 +1,8 @@
 package org.MigrationTool.Models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Constraints {
     private boolean primaryKey;
     private boolean autoIncrement;
@@ -18,6 +21,18 @@ public class Constraints {
         this.autoIncrement = autoIncrement;
         this.nullable = nullable;
         this.unique = unique;
+    }
+
+    @Override
+    public String toString() {
+        List<String> constraintList = new ArrayList<>();
+
+        if (primaryKey) constraintList.add("PRIMARY KEY");
+        if (autoIncrement) constraintList.add("AUTO_INCREMENT");
+        if (!nullable) constraintList.add("NOT NULL");
+        if (unique) constraintList.add("UNIQUE");
+
+        return String.join(" ", constraintList);
     }
 
     public boolean isPrimaryKey() {

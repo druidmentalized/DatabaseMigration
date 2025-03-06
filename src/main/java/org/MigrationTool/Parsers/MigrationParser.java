@@ -98,7 +98,7 @@ public class MigrationParser {
     }
 
     private Column parseColumn(Element columnElement) {
-        String name = columnElement.getAttribute("columnName");
+        String name = columnElement.getAttribute("name");
         String type = columnElement.getAttribute("type");
 
         Element constraintsElement = (Element) columnElement.getElementsByTagName("constraints").item(0);

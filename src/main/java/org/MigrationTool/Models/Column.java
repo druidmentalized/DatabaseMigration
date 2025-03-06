@@ -11,6 +11,11 @@ public class Column {
         this.constraints = constraints;
     }
 
+    @Override
+    public String toString() {
+        return name + " " + type + " " + constraints;
+    }
+
     public String getName() {
         return name;
     }

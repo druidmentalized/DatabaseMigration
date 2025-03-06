@@ -8,7 +8,7 @@ import java.util.List;
 public class MigrationExecutor {
     public void executeMigrations() {
         MigrationParser migrationParser = new MigrationParser();
-        List<Migration> migrations = migrationParser.parseMigrations("migrations.xml");
+        List<Migration> migrations = migrationParser.parseMigrations("src/main/resources/migrations.xml");
 
         for (Migration migration : migrations) {
             if (!alreadyExecuted(migration)) {
@@ -19,10 +19,6 @@ public class MigrationExecutor {
             }
             //todo: add logging
         }
-
-        //todo: checking for unexecuted migrations
-
-        //todo: executing new migrations, calculating their checksum in parallel
 
         //todo: closing everything
     }

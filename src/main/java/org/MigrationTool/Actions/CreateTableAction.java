@@ -1,15 +1,18 @@
 package org.MigrationTool.Actions;
 
+import org.MigrationTool.Utils.DatabasePool;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraints;
 import org.MigrationTool.Utils.ChecksumGenerator;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
 public class CreateTableAction implements MigrationAction {
-    private String tableName;
-    private List<Column> columns;
+    private final String tableName;
+    private final List<Column> columns;
 
     public CreateTableAction(String tableName, List<Column> columns) {
         this.tableName = tableName;
@@ -18,7 +21,25 @@ public class CreateTableAction implements MigrationAction {
 
     @Override
     public void execute() {
+        StringBuilder query = new StringBuilder("CREATE TABLE ")
+                .append(tableName)
+                .append(" (");
 
+        for (int i = 0; i < columns.size(); i++) {
+            query.append(columns.get(i).toString());
+
+            if (i < columns.size() - 1) {
+                query.append(", ");
+            }
+        }
+
+        query.append(");");
+
+        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+            connection.createStatement().execute(query.toString());
+        } catch (SQLException e) {
+            throw new RuntimeException("Migration execution failed: " + e.getMessage(), e);
+        }
     }
 
     @Override

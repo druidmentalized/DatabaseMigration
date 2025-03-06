@@ -1,4 +1,4 @@
-package org.MigrationTool.Main;
+package org.MigrationTool.Utils;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

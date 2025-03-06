@@ -1,12 +1,16 @@
 package org.MigrationTool.Actions;
 
+import org.MigrationTool.Utils.DatabasePool;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraints;
 import org.MigrationTool.Utils.ChecksumGenerator;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 public class AddColumnAction implements MigrationAction {
-    private String tableName;
-    private Column column;
+    private final String tableName;
+    private final Column column;
 
     public AddColumnAction(String tableName, Column column) {
         this.tableName = tableName;
@@ -15,7 +19,18 @@ public class AddColumnAction implements MigrationAction {
 
     @Override
     public void execute() {
+        StringBuilder query = new StringBuilder("ALTER TABLE ")
+                .append(tableName)
+                .append(" ADD COLUMN ")
+                .append(column)
+                .append(";");
 
+        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+            connection.createStatement().execute(query.toString());
+        }
+        catch (SQLException e) {
+            throw new RuntimeException("Migration execution failed: " + e.getMessage(), e);
+        }
     }
 
     @Override
