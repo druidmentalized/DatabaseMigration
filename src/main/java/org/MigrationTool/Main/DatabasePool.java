@@ -1,4 +1,4 @@
-package org.MigrationTool;
+package org.MigrationTool.Main;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -6,8 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabasePool {

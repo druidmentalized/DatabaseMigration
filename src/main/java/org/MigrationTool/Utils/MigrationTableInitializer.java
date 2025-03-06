@@ -1,4 +1,6 @@
-package org.MigrationTool;
+package org.MigrationTool.Utils;
+
+import org.MigrationTool.Main.DatabasePool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
