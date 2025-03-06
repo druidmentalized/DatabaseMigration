@@ -35,4 +35,12 @@ public class Migration {
     public String getChecksum() {
         return checksum;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
 }

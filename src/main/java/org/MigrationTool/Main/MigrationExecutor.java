@@ -9,25 +9,18 @@ public class MigrationExecutor {
     public void executeMigrations() {
         MigrationParser migrationParser = new MigrationParser();
         List<Migration> migrations = migrationParser.parseMigrations("src/main/resources/migrations.xml");
+        MigrationHistory migrationHistory = new MigrationHistory();
 
         for (Migration migration : migrations) {
-            if (!alreadyExecuted(migration)) {
+            if (!migrationHistory.alreadyExecuted(migration)) {
                 for (MigrationAction migrationAction : migration.getMigrationActions()) {
                     migrationAction.execute();
                 }
-                storeSuccessfulMigration(migration);
+                migrationHistory.storeSuccessfulMigration(migration);
             }
             //todo: add logging
         }
 
         //todo: closing everything
-    }
-
-    private boolean alreadyExecuted(Migration migration) {
-        return false;
-    }
-
-    private void storeSuccessfulMigration(Migration migration) {
-
     }
 }

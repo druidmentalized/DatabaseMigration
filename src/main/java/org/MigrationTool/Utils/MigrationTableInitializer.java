@@ -11,7 +11,7 @@ public class MigrationTableInitializer {
                     "author VARCHAR(255) NOT NULL, " +
                     "filename VARCHAR(255) NOT NULL, " +
                     "executionDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-                    "checksum VARCHAR(35) NOT NULL);";
+                    "checksum VARCHAR(255) NOT NULL);";
 
             connection.createStatement().execute(query);
         } catch (SQLException e) {
