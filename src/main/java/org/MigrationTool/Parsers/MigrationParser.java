@@ -4,6 +4,7 @@ import org.MigrationTool.Actions.*;
 import org.MigrationTool.Main.Migration;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraints;
+import org.MigrationTool.Utils.AttributeNames;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,8 +39,8 @@ public class MigrationParser {
     }
 
     private Migration parseMigration(Element migrationElement) {
-        int id = Integer.parseInt(migrationElement.getAttribute("id"));
-        String author = migrationElement.getAttribute("author");
+        int id = Integer.parseInt(migrationElement.getAttribute(AttributeNames.id));
+        String author = migrationElement.getAttribute(AttributeNames.author);
 
         //list for all possible actions
         List<MigrationAction> migrationActions = new ArrayList<>();
@@ -60,7 +61,7 @@ public class MigrationParser {
     private MigrationAction parseAction(Element actionElement) {
         switch (actionElement.getTagName()) {
             case "createTable" -> {
-                String tableName = actionElement.getAttribute("tableName");
+                String tableName = actionElement.getAttribute(AttributeNames.tableName);
 
                 //parsing columns
                 List<Column> columns = new ArrayList<>();
@@ -74,7 +75,7 @@ public class MigrationParser {
                 return new CreateTableAction(tableName, columns);
             }
             case "addColumn" -> {
-                String tableName = actionElement.getAttribute("tableName");
+                String tableName = actionElement.getAttribute(AttributeNames.tableName);
 
                 //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
@@ -84,13 +85,28 @@ public class MigrationParser {
                 return new AddColumnAction(tableName, column);
             }
             case "modifyColumnType" -> {
-                //todo: make modifying column type
+                String tableName = actionElement.getAttribute(AttributeNames.tableName);
+
+                //parsing single column
+                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+
+                Column column = parseColumn(columnElement);
+
+                return new ModifyColumnTypeAction(tableName, column.getName(), column.getNewDataType());
             }
             case "dropColumn" -> {
-                //todo: make dropping column
+                String tableName = actionElement.getAttribute(AttributeNames.tableName);
+
+                //parsing single column
+                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+
+                Column column = parseColumn(columnElement);
+
+                return new DropColumnAction(tableName, column.getName());
             }
             case "dropTable" -> {
-                //todo: make dropping table
+                String tableName = actionElement.getAttribute(AttributeNames.tableName);
+                return new DropTableAction(tableName);
             }
             //todo: add some more as an additional task
         }
@@ -98,25 +114,35 @@ public class MigrationParser {
     }
 
     private Column parseColumn(Element columnElement) {
-        String name = columnElement.getAttribute("name");
-        String type = columnElement.getAttribute("type");
+        Column column = new Column();
+        column.setName(parseStringOrDefault(columnElement, AttributeNames.columnName, ""));
+        column.setType(parseStringOrDefault(columnElement, AttributeNames.columnType, ""));
+        column.setNewDataType(parseStringOrDefault(columnElement, AttributeNames.newDataType, ""));
+
 
         Element constraintsElement = (Element) columnElement.getElementsByTagName("constraints").item(0);
         Constraints constraints = new Constraints();
         if (constraintsElement != null) {
-            constraints.setPrimaryKey(parseBooleanOrDefault(constraintsElement, "primaryKey", false));
-            constraints.setAutoIncrement(parseBooleanOrDefault(constraintsElement, "auto_increment", false));
-            constraints.setNullable(parseBooleanOrDefault(constraintsElement, "nullable", false));
-            constraints.setUnique(parseBooleanOrDefault(constraintsElement, "unique", false));
+            constraints.setPrimaryKey(parseBooleanOrDefault(constraintsElement, AttributeNames.primaryKey, false));
+            constraints.setAutoIncrement(parseBooleanOrDefault(constraintsElement, AttributeNames.autoIncrement, false));
+            constraints.setNullable(parseBooleanOrDefault(constraintsElement, AttributeNames.nullable, false));
+            constraints.setUnique(parseBooleanOrDefault(constraintsElement, AttributeNames.unique, false));
         }
 
-        return new Column(name, type, constraints);
+        return column;
     }
 
     //helper
-    private boolean parseBooleanOrDefault(Element element, String tagName, boolean defaultValue) {
-        if (element.hasAttribute(tagName)) {
-            return Boolean.parseBoolean(element.getAttribute(tagName));
+    private boolean parseBooleanOrDefault(Element element, String attributeName, boolean defaultValue) {
+        if (element.hasAttribute(attributeName)) {
+            return Boolean.parseBoolean(element.getAttribute(attributeName));
+        }
+        return defaultValue;
+    }
+
+    private String parseStringOrDefault(Element element, String attributeName, String defaultValue) {
+        if (element.hasAttribute(attributeName)) {
+            return element.getAttribute(attributeName);
         }
         return defaultValue;
     }

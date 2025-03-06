@@ -6,16 +6,21 @@ import org.MigrationTool.Utils.DatabasePool;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class DropTableAction implements MigrationAction {
-    private String tableName;
+public class ModifyColumnTypeAction implements MigrationAction {
+    private final String tableName;
+    private final String columnName;
+    private final String newDateType;
 
-    public DropTableAction(String tableName) {
+    public ModifyColumnTypeAction(String tableName, String columnName, String newDateType) {
         this.tableName = tableName;
+        this.columnName = columnName;
+        this.newDateType = newDateType;
     }
+
 
     @Override
     public void execute() {
-        String query = "DROP TABLE " + tableName + ";";
+        String query = "ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + newDateType + ";";
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             connection.createStatement().execute(query);
@@ -27,6 +32,6 @@ public class DropTableAction implements MigrationAction {
     @Override
     public String generateChecksum() {
         //making specific signature
-        return ChecksumGenerator.generateWithSHA256("DropTable:" + tableName + "|");
+        return ChecksumGenerator.generateWithSHA256("ModifyColumn:" + tableName + "|" + columnName + newDateType);
     }
 }

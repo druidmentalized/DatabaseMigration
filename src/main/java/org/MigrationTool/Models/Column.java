@@ -4,12 +4,9 @@ public class Column {
     private String name;
     private String type;
     private Constraints constraints;
+    private String newDataType;
 
-    public Column(String name, String type, Constraints constraints) {
-        this.name = name;
-        this.type = type;
-        this.constraints = constraints;
-    }
+    public Column() {}
 
     @Override
     public String toString() {
@@ -35,5 +32,12 @@ public class Column {
     }
     public void setConstraints(Constraints constraints) {
         this.constraints = constraints;
+    }
+
+    public String getNewDataType() {
+        return newDataType;
+    }
+    public void setNewDataType(String newDataType) {
+        this.newDataType = newDataType;
     }
 }
