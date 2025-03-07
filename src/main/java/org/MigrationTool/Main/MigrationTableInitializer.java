@@ -1,5 +1,6 @@
-package org.MigrationTool.Utils;
+package org.MigrationTool.Main;
 
+import org.MigrationTool.Database.DatabasePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

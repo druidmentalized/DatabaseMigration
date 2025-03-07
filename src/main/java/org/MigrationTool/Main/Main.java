@@ -1,6 +1,5 @@
 package org.MigrationTool.Main;
 
-import org.MigrationTool.Utils.MigrationTableInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

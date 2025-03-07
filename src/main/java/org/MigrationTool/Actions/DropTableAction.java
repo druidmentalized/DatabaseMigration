@@ -1,7 +1,7 @@
 package org.MigrationTool.Actions;
 
 import org.MigrationTool.Utils.ChecksumGenerator;
-import org.MigrationTool.Utils.DatabasePool;
+import org.MigrationTool.Database.DatabasePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

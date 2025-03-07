@@ -1,6 +1,7 @@
 package org.MigrationTool.Main;
 
-import org.MigrationTool.Utils.DatabasePool;
+import org.MigrationTool.Utils.ConfigLoader;
+import org.MigrationTool.Database.DatabasePool;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,7 +27,7 @@ public class MigrationHistory {
     public void storeSuccessfulMigration(Migration migration) {
         StringBuilder query = new StringBuilder("INSERT INTO Migration_Table (author, filename, checksum) VALUES ('");
         query.append(migration.getAuthor()).append("', '");
-        query.append("migrations.xml").append("', '");
+        query.append(ConfigLoader.getProperty("migration.folder")).append("', '");
         query.append(migration.getChecksum()).append("')");
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {

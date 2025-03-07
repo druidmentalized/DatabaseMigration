@@ -2,6 +2,7 @@ package org.MigrationTool.Main;
 
 import org.MigrationTool.Actions.MigrationAction;
 import org.MigrationTool.Parsers.MigrationParser;
+import org.MigrationTool.Utils.ConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,7 @@ public class MigrationExecutor {
 
     public void executeMigrations() {
         MigrationParser migrationParser = new MigrationParser();
-        List<Migration> migrations = migrationParser.parseMigrations("src/main/resources/migrations.xml");
+        List<Migration> migrations = migrationParser.parseMigrations(ConfigLoader.getProperty("migration.folder"));
         MigrationHistory migrationHistory = new MigrationHistory();
 
         if (migrations == null || migrations.isEmpty()) {
