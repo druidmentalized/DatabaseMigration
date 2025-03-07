@@ -5,6 +5,8 @@ import org.MigrationTool.Main.Migration;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraints;
 import org.MigrationTool.Utils.AttributeNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,10 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MigrationParser {
+    private static final Logger logger = LoggerFactory.getLogger(MigrationParser.class);
+
     public MigrationParser() {}
 
     public List<Migration> parseMigrations(String filePath) {
         List<Migration> migrations = new ArrayList<>();
+        logger.info("Parsing migrations from file: {}", filePath);
 
         try {
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(filePath);
@@ -24,14 +29,17 @@ public class MigrationParser {
 
             //taking each single migration
             NodeList migrationNodes = document.getElementsByTagName("migration");
+            logger.debug("Found {} migrations in file", migrationNodes.getLength());
+
             for (int i = 0; i < migrationNodes.getLength(); i++) {
                 Element migrationElement = (Element) migrationNodes.item(i);
-
-                migrations.add(parseMigration(migrationElement));
+                Migration migration = parseMigration(migrationElement);
+                migrations.add(migration);
+                logger.debug("Parsed migration: id={}, author={}", migration.getId(), migration.getAuthor());
             }
         }
         catch (Exception e) {
-            System.err.println(e.getMessage());
+            logger.error("Failed to parse migrations: {}", e.getMessage(), e);
             return null;
         }
 
@@ -41,6 +49,7 @@ public class MigrationParser {
     private Migration parseMigration(Element migrationElement) {
         int id = Integer.parseInt(migrationElement.getAttribute(AttributeNames.id));
         String author = migrationElement.getAttribute(AttributeNames.author);
+        logger.debug("Parsing migration id={}, author={}", id, author);
 
         //list for all possible actions
         List<MigrationAction> migrationActions = new ArrayList<>();
@@ -52,14 +61,24 @@ public class MigrationParser {
             if (actionNode.getNodeType() != Node.ELEMENT_NODE) continue;
             Element actionElement = (Element) actionNode;
 
-            migrationActions.add(parseAction(actionElement));
+            MigrationAction migrationAction = parseAction(actionElement);
+            if (migrationAction != null) {
+                migrationActions.add(migrationAction);
+                logger.debug("Parsed action: {}", migrationAction.getClass().getSimpleName());
+            }
+            else {
+                logger.warn("Unknown action faced: {}", actionElement.getTagName());
+            }
         }
 
         return new Migration(id, author, migrationActions);
     }
 
     private MigrationAction parseAction(Element actionElement) {
-        switch (actionElement.getTagName()) {
+        String actionType = actionElement.getTagName();
+        logger.debug("Parsing action type: {}", actionType);
+
+        switch (actionType) {
             case "createTable" -> {
                 String tableName = actionElement.getAttribute(AttributeNames.tableName);
 
@@ -108,6 +127,7 @@ public class MigrationParser {
                 String tableName = actionElement.getAttribute(AttributeNames.tableName);
                 return new DropTableAction(tableName);
             }
+            default -> logger.error("Unsupported action type: {}", actionType);
             //todo: add some more as an additional task
         }
         return null;
@@ -119,6 +139,8 @@ public class MigrationParser {
         column.setType(parseStringOrDefault(columnElement, AttributeNames.columnType, ""));
         column.setNewDataType(parseStringOrDefault(columnElement, AttributeNames.newDataType, ""));
 
+        logger.debug("Parsing column: name={}, type={}, newType={}",
+                column.getName(), column.getType(), column.getNewDataType());
 
         Element constraintsElement = (Element) columnElement.getElementsByTagName("constraints").item(0);
         Constraints constraints = new Constraints();
@@ -127,6 +149,10 @@ public class MigrationParser {
             constraints.setAutoIncrement(parseBooleanOrDefault(constraintsElement, AttributeNames.autoIncrement, false));
             constraints.setNullable(parseBooleanOrDefault(constraintsElement, AttributeNames.nullable, false));
             constraints.setUnique(parseBooleanOrDefault(constraintsElement, AttributeNames.unique, false));
+            logger.debug("Parsed constraints for column '{}': {}", column.getName(), constraints);
+        }
+        else {
+            logger.debug("No constraints specified for column '{}'", column.getName());
         }
 
         return column;

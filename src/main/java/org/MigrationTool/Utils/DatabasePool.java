@@ -2,6 +2,8 @@ package org.MigrationTool.Utils;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -9,15 +11,19 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class DatabasePool {
-    private static HikariDataSource dataSource;
+    private static final Logger logger = LoggerFactory.getLogger(DatabasePool.class);
+    private static final HikariDataSource dataSource;
 
     static {
         try (InputStream input = DatabasePool.class.getClassLoader().getResourceAsStream("database.properties")) {
             Properties properties = new Properties();
             if (input == null) {
+                logger.error("Could not load properties file");
                 throw new IOException("Cannot find database.properties");
             }
             properties.load(input);
+
+            logger.info("Initializing database pool with URL: {}", properties.getProperty("database.url"));
 
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(properties.getProperty("database.url"));
@@ -28,6 +34,7 @@ public class DatabasePool {
 
             dataSource = new HikariDataSource(config);
         } catch (IOException e) {
+            logger.error("Could not initialize database pool");
             throw new RuntimeException("Failed to load database configuration", e);
         }
     }

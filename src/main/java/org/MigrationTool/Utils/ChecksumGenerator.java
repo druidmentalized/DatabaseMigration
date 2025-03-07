@@ -1,15 +1,23 @@
 package org.MigrationTool.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class ChecksumGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(ChecksumGenerator.class);
+
     public static String generateWithSHA256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            return bytesToHex(hash);
+
+            String generatedChecksum = bytesToHex(hash);
+            logger.debug("Generated checksum: {}", generatedChecksum);
+            return generatedChecksum;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

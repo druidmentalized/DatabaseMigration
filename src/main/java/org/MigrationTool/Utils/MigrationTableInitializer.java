@@ -1,9 +1,14 @@
 package org.MigrationTool.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class MigrationTableInitializer {
+    private static final Logger logger = LoggerFactory.getLogger(MigrationTableInitializer.class);
+
     public static void initialize() {
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             String query = "CREATE TABLE IF NOT EXISTS migration_table (" +
@@ -14,8 +19,10 @@ public class MigrationTableInitializer {
                     "checksum VARCHAR(255) NOT NULL);";
 
             connection.createStatement().execute(query);
+            logger.info("Migration history table is ready.");
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to initialize migration history table: {}", e.getMessage(), e);
+            throw new RuntimeException("Error initializing migration history table", e);
         }
     }
 }

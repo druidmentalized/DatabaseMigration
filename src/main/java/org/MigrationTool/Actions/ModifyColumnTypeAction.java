@@ -2,36 +2,43 @@ package org.MigrationTool.Actions;
 
 import org.MigrationTool.Utils.ChecksumGenerator;
 import org.MigrationTool.Utils.DatabasePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class ModifyColumnTypeAction implements MigrationAction {
+    private static final Logger logger = LoggerFactory.getLogger(ModifyColumnTypeAction.class);
     private final String tableName;
     private final String columnName;
-    private final String newDateType;
+    private final String newDataType;
 
-    public ModifyColumnTypeAction(String tableName, String columnName, String newDateType) {
+    public ModifyColumnTypeAction(String tableName, String columnName, String newDataType) {
         this.tableName = tableName;
         this.columnName = columnName;
-        this.newDateType = newDateType;
+        this.newDataType = newDataType;
     }
 
 
     @Override
     public void execute() {
-        String query = "ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + newDateType + ";";
+        logger.info("Executing ModifyColumnTypeAction on table: {}, column: {} to new data type: {}", tableName, columnName, newDataType);
+        String query = "ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + newDataType + ";";
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+            logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
+            logger.info("Successfully modified type of column: {} to new data type: {}", columnName, newDataType);
         } catch (SQLException e) {
-            throw new RuntimeException("Migration execution failed: " + e.getMessage(), e);
+            logger.error("SQL Exception: {}", e.getMessage());
+            throw new RuntimeException("Error executing ModifyColumnTypeAction on table: " + tableName, e);
         }
     }
 
     @Override
     public String generateChecksum() {
         //making specific signature
-        return ChecksumGenerator.generateWithSHA256("ModifyColumn:" + tableName + "|" + columnName + newDateType);
+        return ChecksumGenerator.generateWithSHA256("ModifyColumn:" + tableName + "|" + columnName + newDataType);
     }
 }

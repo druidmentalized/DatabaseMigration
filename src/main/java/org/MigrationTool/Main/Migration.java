@@ -6,10 +6,10 @@ import org.MigrationTool.Utils.ChecksumGenerator;
 import java.util.List;
 
 public class Migration {
-    private int id;
-    private String author;
-    private String checksum;
-    private List<MigrationAction> migrationActions;
+    private final int id;
+    private final String author;
+    private final String checksum;
+    private final List<MigrationAction> migrationActions;
 
     public Migration(int id, String author, List<MigrationAction> migrationActions) {
         this.id = id;
@@ -20,7 +20,8 @@ public class Migration {
     }
 
     private String generateChecksum() {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder("OperationId:").append(id)
+                .append("|Author:").append(author).append("|");
         for (MigrationAction action : migrationActions) {
             stringBuilder.append(action.generateChecksum());
         }

@@ -2,12 +2,15 @@ package org.MigrationTool.Actions;
 
 import org.MigrationTool.Utils.ChecksumGenerator;
 import org.MigrationTool.Utils.DatabasePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DropTableAction implements MigrationAction {
-    private String tableName;
+    private static final Logger logger = LoggerFactory.getLogger(DropTableAction.class);
+    private final String tableName;
 
     public DropTableAction(String tableName) {
         this.tableName = tableName;
@@ -15,12 +18,16 @@ public class DropTableAction implements MigrationAction {
 
     @Override
     public void execute() {
+        logger.info("Executing DropTableAction on table: {}", tableName);
         String query = "DROP TABLE " + tableName + ";";
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+            logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
+            logger.info("Successfully dropped table: {}", tableName);
         } catch (SQLException e) {
-            throw new RuntimeException("Migration execution failed: " + e.getMessage(), e);
+            logger.error("SQL Exception: {}", e.getMessage());
+            throw new RuntimeException("Error executing DropTableAction on table: " + tableName, e);
         }
     }
 

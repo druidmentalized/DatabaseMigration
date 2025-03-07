@@ -4,6 +4,8 @@ import org.MigrationTool.Utils.DatabasePool;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraints;
 import org.MigrationTool.Utils.ChecksumGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class CreateTableAction implements MigrationAction {
+    private static final Logger logger = LoggerFactory.getLogger(CreateTableAction.class);
     private final String tableName;
     private final List<Column> columns;
 
@@ -21,6 +24,7 @@ public class CreateTableAction implements MigrationAction {
 
     @Override
     public void execute() {
+        logger.info("Executing CreateTableAction on table: {}", tableName);
         StringBuilder query = new StringBuilder("CREATE TABLE ")
                 .append(tableName)
                 .append(" (");
@@ -36,9 +40,12 @@ public class CreateTableAction implements MigrationAction {
         query.append(");");
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+            logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
+            logger.info("Table '{}' successfully created or already exists.", tableName);
         } catch (SQLException e) {
-            throw new RuntimeException("Migration execution failed: " + e.getMessage(), e);
+            logger.error("SQL Exception: {}", e.getMessage());
+            throw new RuntimeException("Error executing CreateTableAction for table: " + tableName, e);
         }
     }
 
