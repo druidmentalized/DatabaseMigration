@@ -53,6 +53,7 @@ public class MigrationParser {
 
         //list for all possible actions
         List<MigrationAction> migrationActions = new ArrayList<>();
+        List<MigrationAction> rollbackActions = new ArrayList<>();
 
         //going through all actions in single migration
         NodeList actionNodes = migrationElement.getChildNodes();
@@ -61,17 +62,24 @@ public class MigrationParser {
             if (actionNode.getNodeType() != Node.ELEMENT_NODE) continue;
             Element actionElement = (Element) actionNode;
 
-            MigrationAction migrationAction = parseAction(actionElement);
-            if (migrationAction != null) {
-                migrationActions.add(migrationAction);
-                logger.debug("Parsed action: {}", migrationAction.getClass().getSimpleName());
+            //parsing rollback info(if exists)
+            if (actionElement.getTagName().equals("rollback")) {
+                NodeList rollbackActionNodes = actionElement.getChildNodes();
+                rollbackActions.addAll(parseActions(rollbackActionNodes));
             }
             else {
-                logger.warn("Unknown action faced: {}", actionElement.getTagName());
+                MigrationAction migrationAction = parseAction(actionElement);
+                if (migrationAction != null) {
+                    migrationActions.add(migrationAction);
+                    logger.debug("Parsed action: {}", migrationAction.getClass().getSimpleName());
+                }
+                else {
+                    logger.warn("Unknown action faced: {}", actionElement.getTagName());
+                }
             }
         }
 
-        return new Migration(id, author, migrationActions);
+        return new Migration(id, author, migrationActions, rollbackActions);
     }
 
     private MigrationAction parseAction(Element actionElement) {
@@ -131,6 +139,27 @@ public class MigrationParser {
             //todo: add some more as an additional task
         }
         return null;
+    }
+
+    private List<MigrationAction> parseActions(NodeList rollbackActionNodes) {
+        List<MigrationAction> rollbackActions = new ArrayList<>();
+
+        for (int k = 0; k < rollbackActionNodes.getLength(); k++) {
+            Node rollbackActionNode = rollbackActionNodes.item(k);
+            if (rollbackActionNode.getNodeType() != Node.ELEMENT_NODE) continue;
+            Element rollbackActionElement = (Element) rollbackActionNode;
+
+            MigrationAction rollbackAction = parseAction(rollbackActionElement);
+            if (rollbackAction != null) {
+                rollbackActions.add(rollbackAction);
+                logger.debug("Parsed action: {}", rollbackAction.getClass().getSimpleName());
+            }
+            else {
+                logger.warn("Unknown action faced: {}", rollbackActionElement.getTagName());
+            }
+        }
+
+        return rollbackActions;
     }
 
     private Column parseColumn(Element columnElement) {

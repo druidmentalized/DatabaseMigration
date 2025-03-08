@@ -27,7 +27,7 @@ public class MigrationHistory {
     public void storeSuccessfulMigration(Migration migration) {
         StringBuilder query = new StringBuilder("INSERT INTO Migration_Table (author, filename, checksum) VALUES ('");
         query.append(migration.getAuthor()).append("', '");
-        query.append(ConfigLoader.getProperty("migration.folder")).append("', '");
+        query.append(ConfigLoader.getProperty("migration.file")).append("', '");
         query.append(migration.getChecksum()).append("')");
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
@@ -35,5 +35,9 @@ public class MigrationHistory {
         } catch (SQLException e) {
             throw new RuntimeException("Storing migration in history failed: " + e.getMessage(), e);
         }
+    }
+
+    public void deleteRolledBackMigration(Migration migration) {
+
     }
 }
