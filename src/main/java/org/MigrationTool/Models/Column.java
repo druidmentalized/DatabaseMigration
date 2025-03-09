@@ -6,7 +6,12 @@ public class Column {
     private Constraints constraints;
     private String newDataType;
 
-    public Column() {}
+    public Column() {
+        this.name = "";
+        this.type = "";
+        this.constraints = new Constraints();
+        this.newDataType = "";
+    }
 
     @Override
     public String toString() {

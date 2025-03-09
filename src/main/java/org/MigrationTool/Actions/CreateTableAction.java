@@ -42,7 +42,7 @@ public class CreateTableAction implements MigrationAction {
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
-            logger.info("Table '{}' successfully created or already exists.", tableName);
+            logger.info("Table '{}' successfully created", tableName);
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing CreateTableAction for table: " + tableName, e);

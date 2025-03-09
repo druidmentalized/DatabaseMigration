@@ -20,6 +20,13 @@
                 <constraints unique="true" nullable="false"/>
             </column>
         </addColumn>
+
+        <rollback>
+            <dropColumn tableName="users">
+                <column columnName="address"/>
+            </dropColumn>
+            <dropTable tableName="users"/>
+        </rollback>
     </migration>
 
     <migration id="2" author="dmitriy">
@@ -28,6 +35,12 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+
+        <rollback>
+            <dropColumn tableName="users">
+                <column columnName="email"/>
+            </dropColumn>
+        </rollback>
     </migration>
 
     <migration id="3" author="dmitriy">
@@ -36,18 +49,38 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+
+        <rollback>
+            <dropColumn tableName="users">
+                <column columnName="height"/>
+            </dropColumn>
+        </rollback>
     </migration>
 
     <migration id="4" author="dmitriy">
         <modifyColumnType tableName="users">
             <column columnName="name" newDataType="TEXT"/>
         </modifyColumnType>
+
+        <rollback>
+            <modifyColumnType tableName="users">
+                <column columnName="name" newDataType="varchar(100)"/>
+            </modifyColumnType>
+        </rollback>
     </migration>
 
     <migration id="5" author="dmitriy">
         <dropColumn tableName="users">
             <column columnName="email"/>
         </dropColumn>
+
+        <rollback>
+            <addColumn tableName="users">
+                <column columnName="email" columnType="varchar(100)">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </rollback>
     </migration>
 
     <migration id="6" author="dmitriy">
@@ -59,11 +92,26 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable tableName ="sweets"/>
+        </rollback>
     </migration>
 
 
     <migration id="7" author="dmitriy">
         <dropTable tableName="sweets"/>
+
+        <rollback>
+            <createTable tableName ="sweets">
+                <column columnName="id" columnType="int">
+                    <constraints auto_increment="true" primaryKey="true" nullable="false"/>
+                </column>
+                <column columnName="sweetness" columnType="int">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+        </rollback>
     </migration>
 
     <migration id="8" author="dmitriy">
@@ -75,6 +123,10 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable tableName="sweets"/>
+        </rollback>
     </migration>
 
     <migration id="9" author="dmitriy">
@@ -86,6 +138,10 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable tableName="jobs"/>
+        </rollback>
     </migration>
 </migrations>
 

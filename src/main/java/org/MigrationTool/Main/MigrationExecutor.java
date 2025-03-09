@@ -37,8 +37,6 @@ public class MigrationExecutor {
                 }
 
                 migrationHistory.storeSuccessfulMigration(migration);
-                logger.info("Migration ID={} executed successfully and stored.", migration.getId());
-
             } catch (Exception e) {
                 logger.error("Migration ID={} failed: {}", migration.getId(), e.getMessage(), e);
                 throw new RuntimeException("Migration execution failed for ID=" + migration.getId(), e);
@@ -76,7 +74,6 @@ public class MigrationExecutor {
                 }
 
                 migrationHistory.deleteRolledBackMigration(migration);
-                logger.info("Migration ID={} rolled back successfully.", migration.getId());
             }
             catch (Exception e) {
                 logger.error("Rolling back migration ID={} failed: {}", migration.getId(), e.getMessage(), e);

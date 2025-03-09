@@ -172,7 +172,7 @@ public class MigrationParser {
                 column.getName(), column.getType(), column.getNewDataType());
 
         Element constraintsElement = (Element) columnElement.getElementsByTagName("constraints").item(0);
-        Constraints constraints = new Constraints();
+        Constraints constraints = column.getConstraints();
         if (constraintsElement != null) {
             constraints.setPrimaryKey(parseBooleanOrDefault(constraintsElement, AttributeNames.primaryKey, false));
             constraints.setAutoIncrement(parseBooleanOrDefault(constraintsElement, AttributeNames.autoIncrement, false));
