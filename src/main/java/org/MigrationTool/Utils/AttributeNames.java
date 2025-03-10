@@ -16,8 +16,7 @@ public class AttributeNames {
     public static String newDataType = "newDataType";
 
     //constraints
-    public static String autoIncrement = "auto_increment";
-    public static String primaryKey = "primaryKey";
-    public static String nullable = "nullable";
-    public static String unique = "unique";
+    public static String constraintType = "constraintType";
+    public static String constraintName = "constraintName";
+    public static String expression = "expression";
 }

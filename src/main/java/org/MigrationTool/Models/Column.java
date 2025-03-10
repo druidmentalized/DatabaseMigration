@@ -1,21 +1,23 @@
 package org.MigrationTool.Models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Column {
     private String name;
     private String type;
-    private Constraints constraints;
     private String newDataType;
+    private final List<Constraint> constraintsList = new ArrayList<>();
 
     public Column() {
         this.name = "";
         this.type = "";
-        this.constraints = new Constraints();
         this.newDataType = "";
     }
 
     @Override
     public String toString() {
-        return name + " " + type + " " + constraints;
+        return name + " " + type;
     }
 
     public String getName() {
@@ -32,11 +34,8 @@ public class Column {
         this.type = type;
     }
 
-    public Constraints getConstraints() {
-        return constraints;
-    }
-    public void setConstraints(Constraints constraints) {
-        this.constraints = constraints;
+    public List<Constraint> getConstraintsList() {
+        return constraintsList;
     }
 
     public String getNewDataType() {

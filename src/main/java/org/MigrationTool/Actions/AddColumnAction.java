@@ -2,13 +2,14 @@ package org.MigrationTool.Actions;
 
 import org.MigrationTool.Database.DatabasePool;
 import org.MigrationTool.Models.Column;
-import org.MigrationTool.Models.Constraints;
+import org.MigrationTool.Models.Constraint;
 import org.MigrationTool.Utils.ChecksumGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class AddColumnAction implements MigrationAction {
     private static final Logger logger = LoggerFactory.getLogger(AddColumnAction.class);
@@ -47,14 +48,7 @@ public class AddColumnAction implements MigrationAction {
 
         //creating specific signature
         stringBuilder.append("AddColumn:").append(tableName).append("|");
-        stringBuilder.append(column.getName()).append(column.getType());
-        Constraints constraints = column.getConstraints();
-        if (constraints != null) {
-            stringBuilder.append("PrimaryKey=").append(constraints.isPrimaryKey())
-                    .append("AutoIncrement=").append(constraints.isAutoIncrement())
-                    .append("Nullable=").append(constraints.isNullable())
-                    .append("Unique=").append(constraints.isUnique());
-        }
+        stringBuilder.append(column);
 
         return ChecksumGenerator.generateWithSHA256(stringBuilder.toString());
     }

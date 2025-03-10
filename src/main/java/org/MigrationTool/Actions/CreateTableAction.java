@@ -2,6 +2,8 @@ package org.MigrationTool.Actions;
 
 import org.MigrationTool.Database.DatabasePool;
 import org.MigrationTool.Models.Column;
+import org.MigrationTool.Models.Constraint;
+import org.MigrationTool.Models.ConstraintType;
 import org.MigrationTool.Models.Constraints;
 import org.MigrationTool.Utils.ChecksumGenerator;
 import org.slf4j.Logger;
@@ -25,12 +27,21 @@ public class CreateTableAction implements MigrationAction {
     @Override
     public void execute() {
         logger.info("Executing CreateTableAction on table: {}", tableName);
+
         StringBuilder query = new StringBuilder("CREATE TABLE ")
                 .append(tableName)
                 .append(" (");
 
+        //adding columns with simple unnamed constraints
         for (int i = 0; i < columns.size(); i++) {
-            query.append(columns.get(i).toString());
+            Column column = columns.get(i);
+            query.append(column);
+
+            for (Constraint constraint : column.getConstraintsList()) {
+                if (!constraint.isNamed()) {
+                    query.append(" ").append(constraint);
+                }
+            }
 
             if (i < columns.size() - 1) {
                 query.append(", ");
@@ -49,6 +60,25 @@ public class CreateTableAction implements MigrationAction {
         }
     }
 
+    private void executeNamedConstraints() {
+        for (Column column : columns) {
+            for (Constraint constraint : column.getConstraintsList()) {
+                if (constraint.isNamed()) {
+                    String query = String.format("ALTER TABLE %s ADD $s;", tableName, constraint);
+
+                    try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+                        logger.debug("Executing constraint SQL: {}", query);
+                        connection.createStatement().execute(query);
+                        logger.info("Constraint '{}' added successfully", constraint.getName());
+                    } catch (SQLException e) {
+                        logger.error("SQL Exception: {}", e.getMessage());
+                        throw new RuntimeException("Error adding named constraint: " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public String generateChecksum() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -57,17 +87,7 @@ public class CreateTableAction implements MigrationAction {
         stringBuilder.append("CreateTable:").append(tableName).append("|");
         columns.stream()
                 .sorted(Comparator.comparing(Column::getName))
-                .forEach(column -> {
-                    stringBuilder.append(column.getName()).append(column.getType());
-
-                    Constraints constraints = column.getConstraints();
-                    if (constraints != null) {
-                        stringBuilder.append("PrimaryKey=").append(constraints.isPrimaryKey())
-                                     .append("AutoIncrement=").append(constraints.isAutoIncrement())
-                                     .append("Nullable=").append(constraints.isNullable())
-                                     .append("Unique=").append(constraints.isUnique());
-                    }
-                });
+                .forEach(stringBuilder::append);
 
         return ChecksumGenerator.generateWithSHA256(stringBuilder.toString());
     }

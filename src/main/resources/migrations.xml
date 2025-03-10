@@ -2,22 +2,25 @@
     <migration id="1" author="dmitriy">
         <createTable tableName="users">
             <column columnName="id" columnType="int">
-                <constraints auto_increment="true" primaryKey="true" nullable="false"/>
+                <constraint type="auto_increment"/>
+                <constraint type="primary_key"/>
+                <constraint type="not_null"/>
             </column>
             <column columnName="name" columnType="varchar(100)">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
             <column columnName="surname" columnType="varchar(100)">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
             <column columnName="birthdate" columnType="timestamp">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
         </createTable>
 
         <addColumn tableName="users">
             <column columnName="address" columnType="varchar(100)">
-                <constraints unique="true" nullable="false"/>
+                <constraint type="unique"/>
+                <constraint type="not_null"/>
             </column>
         </addColumn>
 
@@ -32,7 +35,7 @@
     <migration id="2" author="dmitriy">
         <addColumn tableName="users">
             <column columnName="email" columnType="varchar(100)">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
         </addColumn>
 
@@ -46,7 +49,7 @@
     <migration id="3" author="dmitriy">
         <addColumn tableName="users">
             <column columnName="height" columnType="int">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
         </addColumn>
 
@@ -77,7 +80,7 @@
         <rollback>
             <addColumn tableName="users">
                 <column columnName="email" columnType="varchar(100)">
-                    <constraints nullable="false"/>
+                    <constraint type="not_null"/>
                 </column>
             </addColumn>
         </rollback>
@@ -86,10 +89,12 @@
     <migration id="6" author="dmitriy">
         <createTable tableName="sweets">
             <column columnName="id" columnType="int">
-                <constraints auto_increment="true" primaryKey="true" nullable="false"/>
+                <constraint type="auto_increment"/>
+                <constraint type="primary_key"/>
+                <constraint type="not_null"/>
             </column>
             <column columnName="sweetness" columnType="int">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
         </createTable>
 
@@ -105,10 +110,12 @@
         <rollback>
             <createTable tableName ="sweets">
                 <column columnName="id" columnType="int">
-                    <constraints auto_increment="true" primaryKey="true" nullable="false"/>
+                    <constraint type="auto_increment"/>
+                    <constraint type="primary_key"/>
+                    <constraint type="not_null"/>
                 </column>
                 <column columnName="sweetness" columnType="int">
-                    <constraints nullable="false"/>
+                    <constraint type="not_null"/>
                 </column>
             </createTable>
         </rollback>
@@ -117,10 +124,12 @@
     <migration id="8" author="dmitriy">
         <createTable tableName="sweets">
             <column columnName="id" columnType="int">
-                <constraints auto_increment="true" primaryKey="true" nullable="false"/>
+                <constraint type="auto_increment"/>
+                <constraint type="primary_key"/>
+                <constraint type="not_null"/>
             </column>
             <column columnName="sweetness" columnType="int">
-                <constraints nullable="false"/>
+                <constraint type="not_null"/>
             </column>
         </createTable>
 
@@ -132,10 +141,12 @@
     <migration id="9" author="dmitriy">
         <createTable tableName="jobs">
             <column columnName="id" columnType="int">
-                <constraints auto_increment="true" primaryKey="true" nullable="false"/>
+                <constraint type="auto_increment"/>
+                <constraint type="primary_key"/>
+                <constraint type="not_null"/>
             </column>
             <column columnName="name" columnType="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints type="not_null"/>
             </column>
         </createTable>
 
