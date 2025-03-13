@@ -16,7 +16,7 @@ public class Main {
 
             logger.info("Executing migrations...");
             new MigrationExecutor().executeMigrations();
-            //new MigrationExecutor().rollbackMigrations(3);
+            //new MigrationExecutor().rollbackMigrations(1);
             logger.info("Migration execution completed successfully.");
         } catch (Exception e) {
             logger.error("MigrationTool encountered a fatal error: {}", e.getMessage(), e);

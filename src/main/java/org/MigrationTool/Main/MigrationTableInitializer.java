@@ -14,6 +14,7 @@ public class MigrationTableInitializer {
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             String query = "CREATE TABLE IF NOT EXISTS migration_table (" +
                     "id INTEGER AUTO_INCREMENT PRIMARY KEY, " +
+                    "migrationID INTEGER NOT NULL, " +
                     "author VARCHAR(255) NOT NULL, " +
                     "filename VARCHAR(255) NOT NULL, " +
                     "executionDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +

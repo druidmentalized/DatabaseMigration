@@ -16,7 +16,7 @@ public class AttributeNames {
     public static String newDataType = "newDataType";
 
     //constraints
-    public static String constraintType = "constraintType";
+    public static String constraintType = "type";
     public static String constraintName = "constraintName";
     public static String expression = "expression";
 }

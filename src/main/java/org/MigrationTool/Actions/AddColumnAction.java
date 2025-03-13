@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 public class AddColumnAction implements MigrationAction {
     private static final Logger logger = LoggerFactory.getLogger(AddColumnAction.class);
@@ -28,8 +27,16 @@ public class AddColumnAction implements MigrationAction {
         StringBuilder query = new StringBuilder("ALTER TABLE ")
                 .append(tableName)
                 .append(" ADD COLUMN ")
-                .append(column)
-                .append(";");
+                .append(column);
+
+        //appending all unnamed constraints
+        for (Constraint constraint : column.getConstraintsList()) {
+            if (!constraint.isNamed()) {
+                query.append(" ").append(constraint);
+            }
+        }
+
+        query.append(";");
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             logger.debug("SQL Query: {}", query);
@@ -40,6 +47,13 @@ public class AddColumnAction implements MigrationAction {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing AddColumnAction on table: " + tableName, e);
         }
+
+        //adding all named constraints
+        for (Constraint constraint : column.getConstraintsList()) {
+            if (constraint.isNamed()) {
+                new AddConstraintAction(tableName, constraint).execute();
+            }
+        }
     }
 
     @Override
@@ -49,6 +63,7 @@ public class AddColumnAction implements MigrationAction {
         //creating specific signature
         stringBuilder.append("AddColumn:").append(tableName).append("|");
         stringBuilder.append(column);
+        column.getConstraintsList().forEach(stringBuilder::append);
 
         return ChecksumGenerator.generateWithSHA256(stringBuilder.toString());
     }

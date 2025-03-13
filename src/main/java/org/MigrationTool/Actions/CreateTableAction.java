@@ -3,8 +3,6 @@ package org.MigrationTool.Actions;
 import org.MigrationTool.Database.DatabasePool;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraint;
-import org.MigrationTool.Models.ConstraintType;
-import org.MigrationTool.Models.Constraints;
 import org.MigrationTool.Utils.ChecksumGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,22 +56,12 @@ public class CreateTableAction implements MigrationAction {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing CreateTableAction for table: " + tableName, e);
         }
-    }
 
-    private void executeNamedConstraints() {
+        //adding all named constraints
         for (Column column : columns) {
             for (Constraint constraint : column.getConstraintsList()) {
                 if (constraint.isNamed()) {
-                    String query = String.format("ALTER TABLE %s ADD $s;", tableName, constraint);
-
-                    try (Connection connection = DatabasePool.getDataSource().getConnection()) {
-                        logger.debug("Executing constraint SQL: {}", query);
-                        connection.createStatement().execute(query);
-                        logger.info("Constraint '{}' added successfully", constraint.getName());
-                    } catch (SQLException e) {
-                        logger.error("SQL Exception: {}", e.getMessage());
-                        throw new RuntimeException("Error adding named constraint: " + e.getMessage(), e);
-                    }
+                    new AddConstraintAction(tableName, constraint).execute();
                 }
             }
         }
@@ -87,7 +75,10 @@ public class CreateTableAction implements MigrationAction {
         stringBuilder.append("CreateTable:").append(tableName).append("|");
         columns.stream()
                 .sorted(Comparator.comparing(Column::getName))
-                .forEach(stringBuilder::append);
+                .forEach(column -> {
+                    stringBuilder.append(column);
+                    column.getConstraintsList().forEach(stringBuilder::append);
+                });
 
         return ChecksumGenerator.generateWithSHA256(stringBuilder.toString());
     }

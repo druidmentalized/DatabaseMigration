@@ -14,7 +14,6 @@ import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class MigrationParser {
     private static final Logger logger = LoggerFactory.getLogger(MigrationParser.class);
@@ -68,10 +67,10 @@ public class MigrationParser {
             //parsing rollback info(if exists)
             if (actionElement.getTagName().equals("rollback")) {
                 NodeList rollbackActionNodes = actionElement.getChildNodes();
-                rollbackActions.addAll(parseActions(rollbackActionNodes, id));
+                rollbackActions.addAll(parseActions(rollbackActionNodes));
             }
             else {
-                MigrationAction migrationAction = parseAction(actionElement, id);
+                MigrationAction migrationAction = parseAction(actionElement);
                 if (migrationAction != null) {
                     migrationActions.add(migrationAction);
                     logger.debug("Parsed action: {}", migrationAction.getClass().getSimpleName());
@@ -85,7 +84,7 @@ public class MigrationParser {
         return new Migration(id, author, migrationActions, rollbackActions);
     }
 
-    private MigrationAction parseAction(Element actionElement, int migrationId) {
+    private MigrationAction parseAction(Element actionElement) {
         String actionType = actionElement.getTagName();
         String tableName = actionElement.getAttribute(AttributeNames.tableName);
         logger.debug("Parsing action type '{}' on table '{}' ", actionType, tableName);
@@ -98,22 +97,26 @@ public class MigrationParser {
                 for (int i = 0; i < columnNodes.getLength(); i++) {
                     Element columnElement = (Element) columnNodes.item(i);
 
-                    columns.add(parseColumn(columnElement, tableName, migrationId));
+                    columns.add(parseColumn(columnElement, tableName));
                 }
 
                 return new CreateTableAction(tableName, columns);
             }
             case "addColumn" -> {
-
                 //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
-                Column column = parseColumn(columnElement, tableName, migrationId);
+                Column column = parseColumn(columnElement, tableName);
 
                 return new AddColumnAction(tableName, column);
             }
             case "addConstraint" -> {
+                //parsing single column
+                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
+                Column column = parseColumn(columnElement, tableName);
+
+                return new AddConstraintAction(tableName, column.getConstraintsList().getFirst());
             }
             case "addIndex" -> {
 
@@ -131,7 +134,7 @@ public class MigrationParser {
                 //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
-                Column column = parseColumn(columnElement, tableName, migrationId);
+                Column column = parseColumn(columnElement, tableName);
 
                 return new ModifyColumnTypeAction(tableName, column.getName(), column.getNewDataType());
             }
@@ -139,7 +142,7 @@ public class MigrationParser {
                 //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
-                Column column = parseColumn(columnElement, tableName, migrationId);
+                Column column = parseColumn(columnElement, tableName);
 
                 return new DropColumnAction(tableName, column.getName());
             }
@@ -147,7 +150,11 @@ public class MigrationParser {
                 return new DropTableAction(tableName);
             }
             case "dropConstraint" -> {
+                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
+                Column column = parseColumn(columnElement, tableName);
+
+                return new DropConstraintAction(tableName, column.getConstraintsList().getFirst());
             }
             case "dropIndex" -> {
 
@@ -161,7 +168,7 @@ public class MigrationParser {
         return null;
     }
 
-    private List<MigrationAction> parseActions(NodeList rollbackActionNodes, int migrationId) {
+    private List<MigrationAction> parseActions(NodeList rollbackActionNodes) {
         List<MigrationAction> rollbackActions = new ArrayList<>();
 
         for (int k = 0; k < rollbackActionNodes.getLength(); k++) {
@@ -169,10 +176,10 @@ public class MigrationParser {
             if (rollbackActionNode.getNodeType() != Node.ELEMENT_NODE) continue;
             Element rollbackActionElement = (Element) rollbackActionNode;
 
-            MigrationAction rollbackAction = parseAction(rollbackActionElement, migrationId);
+            MigrationAction rollbackAction = parseAction(rollbackActionElement);
             if (rollbackAction != null) {
                 rollbackActions.add(rollbackAction);
-                logger.debug("Parsed action: {}", rollbackAction.getClass().getSimpleName());
+                logger.debug("Parsed rollback action: {}", rollbackAction.getClass().getSimpleName());
             }
             else {
                 logger.warn("Unknown action faced: {}", rollbackActionElement.getTagName());
@@ -182,7 +189,7 @@ public class MigrationParser {
         return rollbackActions;
     }
 
-    private Column parseColumn(Element columnElement, String tableName, int migrationId) {
+    private Column parseColumn(Element columnElement, String tableName) {
         Column column = new Column();
         column.setName(parseStringOrDefault(columnElement, AttributeNames.columnName, ""));
         column.setType(parseStringOrDefault(columnElement, AttributeNames.columnType, ""));
@@ -191,7 +198,7 @@ public class MigrationParser {
         NodeList constraintsNodes = columnElement.getElementsByTagName("constraint");
         for (int i = 0; i < constraintsNodes.getLength(); i++) {
             Element constraintElement = (Element) constraintsNodes.item(i);
-            Constraint constraint = parseConstraint(constraintElement, tableName, column.getName(), migrationId);
+            Constraint constraint = parseConstraint(constraintElement, tableName, column.getName());
             column.getConstraintsList().add(constraint);
         }
 
@@ -204,27 +211,23 @@ public class MigrationParser {
         return column;
     }
 
-    private Constraint parseConstraint(Element constraintElement, String tableName, String columnName, int migrationId) {
+    private Constraint parseConstraint(Element constraintElement, String tableName, String columnName) {
         Constraint constraint = new Constraint();
 
         try {
             //getting type
-            ConstraintType type = ConstraintType.valueOf(constraintElement.getAttribute("type").toUpperCase());
+            ConstraintType type = ConstraintType.valueOf(constraintElement.getAttribute(AttributeNames.constraintType).toUpperCase());
             constraint.setType(type);
 
             //generating name
-            String name = ConstraintNameGenerator.generateConstraintName(tableName, columnName, type.toString(), migrationId);
+            String name = ConstraintNameGenerator.generateConstraintName(tableName, columnName, type.toString());
             constraint.setName(name);
 
-            if (type == ConstraintType.CHECK) {
-                constraint.setExpression(constraintElement.getAttribute("expression"));
-            }
-            else {
-                constraint.setExpression(columnName);
-            }
+            constraint.setExpression(parseStringOrDefault(constraintElement, AttributeNames.expression, ""));
+            constraint.setColumnName(columnName);
 
         } catch (IllegalArgumentException e) {
-            logger.error("Unsupported constraint type: {}", constraintElement.getAttribute("type"));
+            logger.error("Unsupported constraint type: {}", constraintElement.getAttribute(AttributeNames.constraintType));
             throw new RuntimeException("Unsupported constraint type", e);
         }
 

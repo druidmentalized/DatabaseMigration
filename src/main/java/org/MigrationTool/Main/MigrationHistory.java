@@ -35,7 +35,8 @@ public class MigrationHistory {
     }
 
     public void storeSuccessfulMigration(Migration migration) {
-        StringBuilder query = new StringBuilder("INSERT INTO Migration_Table (author, filename, checksum) VALUES ('");
+        StringBuilder query = new StringBuilder("INSERT INTO Migration_Table (migrationID, author, filename, checksum) VALUES ('");
+        query.append(migration.getId()).append("', '");
         query.append(migration.getAuthor()).append("', '");
         query.append(ConfigLoader.getProperty("migration.file")).append("', '");
         query.append(migration.getChecksum()).append("')");
