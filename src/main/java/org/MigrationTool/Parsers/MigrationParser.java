@@ -92,7 +92,6 @@ public class MigrationParser {
 
         switch (actionType) {
             case "createTable" -> {
-                //parsing columns
                 List<Column> columns = new ArrayList<>();
                 NodeList columnNodes = actionElement.getElementsByTagName("column");
                 for (int i = 0; i < columnNodes.getLength(); i++) {
@@ -101,31 +100,28 @@ public class MigrationParser {
                     columns.add(parseColumn(columnElement, tableName));
                 }
 
-                return new CreateTableAction(tableName, columns);
+                return new CreateTableAction(columns);
             }
             case "addColumn" -> {
-                //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
                 Column column = parseColumn(columnElement, tableName);
 
-                return new AddColumnAction(tableName, column);
+                return new AddColumnAction(column);
             }
             case "addConstraint" -> {
-                //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
                 Column column = parseColumn(columnElement, tableName);
 
-                return new AddConstraintAction(tableName, column.getConstraintsList().getFirst());
+                return new AddConstraintAction(column.getConstraintsList().getFirst());
             }
             case "addIndex" -> {
-                //parsing index
                 Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
 
                 Index index = parseIndex(indexElement, tableName);
 
-                return new AddIndexAction(tableName, index);
+                return new AddIndexAction(index);
             }
             case "renameTable" -> {
                 String newTableName = actionElement.getAttribute(AttributeNames.newTableName);
@@ -137,15 +133,14 @@ public class MigrationParser {
 
                 Column column = parseColumn(columnElement, tableName);
 
-                return new RenameColumnAction(tableName, column.getName(), column.getNewColumnName());
+                return new RenameColumnAction(column);
             }
             case "modifyColumnType" -> {
-                //parsing single column
                 Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
                 Column column = parseColumn(columnElement, tableName);
 
-                return new ModifyColumnTypeAction(tableName, column.getName(), column.getNewDataType());
+                return new ModifyColumnTypeAction(column);
             }
             case "dropColumn" -> {
                 //parsing single column
@@ -153,7 +148,7 @@ public class MigrationParser {
 
                 Column column = parseColumn(columnElement, tableName);
 
-                return new DropColumnAction(tableName, column.getName());
+                return new DropColumnAction(column);
             }
             case "dropTable" -> {
                 return new DropTableAction(tableName);
@@ -163,15 +158,14 @@ public class MigrationParser {
 
                 Column column = parseColumn(columnElement, tableName);
 
-                return new DropConstraintAction(tableName, column.getConstraintsList().getFirst());
+                return new DropConstraintAction(column.getConstraintsList().getFirst());
             }
             case "dropIndex" -> {
-                //parsing index
                 Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
 
                 Index index = parseIndex(indexElement, tableName);
 
-                return new DropIndexAction(tableName, index);
+                return new DropIndexAction(index);
             }
             default -> logger.error("Unsupported action type: {}", actionType);
         }
@@ -202,9 +196,10 @@ public class MigrationParser {
     private Column parseColumn(Element columnElement, String tableName) {
         Column column = new Column();
         column.setName(parseStringOrDefault(columnElement, AttributeNames.columnName, ""));
+        column.setTableName(tableName);
         column.setType(parseStringOrDefault(columnElement, AttributeNames.columnType, ""));
         column.setNewDataType(parseStringOrDefault(columnElement, AttributeNames.newDataType, ""));
-        column.setNewColumnName(parseStringOrDefault(columnElement, AttributeNames.newColumnName, ""));
+        column.setNewName(parseStringOrDefault(columnElement, AttributeNames.newColumnName, ""));
 
         NodeList constraintsNodes = columnElement.getElementsByTagName("constraint");
         for (int i = 0; i < constraintsNodes.getLength(); i++) {
@@ -225,6 +220,7 @@ public class MigrationParser {
     private Index parseIndex(Element indexElement, String tableName) {
         Index index = new Index();
         index.setUnique(parseBooleanOrDefault(indexElement, AttributeNames.indexUniqueness, false));
+        index.setTableName(tableName);
 
         List<String> columnNames = index.getColumns();
         NodeList columnNodes = indexElement.getElementsByTagName("column");
@@ -243,6 +239,7 @@ public class MigrationParser {
 
     private Constraint parseConstraint(Element constraintElement, String tableName, String columnName) {
         Constraint constraint = new Constraint();
+        constraint.setTableName(tableName);
 
         try {
             //getting type

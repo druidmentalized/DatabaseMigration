@@ -34,6 +34,6 @@ public class DropTableAction implements MigrationAction {
     @Override
     public String generateChecksum() {
         //making specific signature
-        return ChecksumGenerator.generateWithSHA256("DropTable:" + tableName + "|");
+        return ChecksumGenerator.generateWithSHA256("DropTable:" + tableName);
     }
 }

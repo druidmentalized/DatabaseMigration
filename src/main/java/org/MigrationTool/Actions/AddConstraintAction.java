@@ -11,31 +11,29 @@ import java.sql.SQLException;
 
 public class AddConstraintAction implements MigrationAction {
     private static final Logger logger = LoggerFactory.getLogger(AddConstraintAction.class);
-    private final String tableName;
     private final Constraint constraint;
 
-    public AddConstraintAction(String tableName, Constraint constraint) {
-        this.tableName = tableName;
+    public AddConstraintAction(Constraint constraint) {
         this.constraint = constraint;
     }
 
     @Override
     public void execute() {
-        logger.info("Executing AddConstraint on table {} with constraint {}", tableName, constraint);
+        logger.info("Executing AddConstraint on table {} with constraint {}", constraint.getTableName(), constraint);
 
         String query;
 
         if (constraint.isNamed()) {
-            query = String.format("ALTER TABLE %s ADD CONSTRAINT %s;", tableName, constraint);
+            query = String.format("ALTER TABLE %s ADD CONSTRAINT %s;", constraint.getTableName(), constraint);
         }
         else {
-            query = String.format("ALTER TABLE %s ALTER COLUMN %s SET %s;", tableName, constraint.getColumnName(), constraint);
+            query = String.format("ALTER TABLE %s ALTER COLUMN %s SET %s;", constraint.getTableName(), constraint.getColumnName(), constraint);
         }
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
-            logger.info("Constraint '{}' successfully added", constraint);
+            logger.info("Constraint '{}' successfully added", constraint.getTableName());
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing AddConstraintAction: " + e.getMessage());
@@ -45,8 +43,7 @@ public class AddConstraintAction implements MigrationAction {
     @Override
     public String generateChecksum() {
         //creating special signature
-        String string = "AddConstraint:" + tableName + "|" + constraint;
-
+        String string = "AddConstraint:" + constraint.getTableName() + "|" + constraint;
         return ChecksumGenerator.generateWithSHA256(string);
     }
 }

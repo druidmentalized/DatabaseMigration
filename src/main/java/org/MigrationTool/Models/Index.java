@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Index {
     private String name;
+    private String tableName;
     private final List<String> columns = new ArrayList<>();
     private boolean unique;
 
@@ -20,6 +21,13 @@ public class Index {
     }
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public List<String> getColumns() {

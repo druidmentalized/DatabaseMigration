@@ -14,11 +14,9 @@ import java.sql.SQLException;
 
 public class DropConstraintAction implements MigrationAction {
     private static final Logger logger = LoggerFactory.getLogger(DropConstraintAction.class);
-    private final String tableName;
     private final Constraint constraint;
 
-    public DropConstraintAction(String tableName, Constraint constraint) {
-        this.tableName = tableName;
+    public DropConstraintAction(Constraint constraint) {
         this.constraint = constraint;
     }
 
@@ -27,10 +25,10 @@ public class DropConstraintAction implements MigrationAction {
         String query = "";
 
         if (constraint.isNamed()) {
-            query = "ALTER TABLE " + tableName + " DROP CONSTRAINT " + constraint.getName();
+            query = "ALTER TABLE " + constraint.getTableName() + " DROP CONSTRAINT " + constraint.getName();
         }
         else if (constraint.getType() == ConstraintType.NOT_NULL) {
-            query = "ALTER TABLE " + tableName + " ALTER COLUMN " + constraint.getColumnName() + " DROP NOT NULL";
+            query = "ALTER TABLE " + constraint.getTableName() + " ALTER COLUMN " + constraint.getColumnName() + " DROP NOT NULL";
         }
         else if (constraint.getType() == ConstraintType.AUTO_INCREMENT) {
             //todo: make
@@ -44,17 +42,17 @@ public class DropConstraintAction implements MigrationAction {
             connection.createStatement().execute(query);
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
-            throw new RuntimeException("Error executing DropConstraintAction on table " + tableName + ", constraint " + constraint);
+            throw new RuntimeException("Error executing DropConstraintAction on table " + constraint.getTableName() + ", constraint " + constraint);
         }
     }
 
     @Override
     public String generateChecksum() {
-        String string = "DropConstraint: " + tableName + "|" + constraint;
+        String string = "DropConstraint: " + constraint.getTableName() + "|" + constraint;
         return ChecksumGenerator.generateWithSHA256(string);
     }
 
-    //helper
+    //todo: make helper
     private String getColumnType(String tableName, String columnName) {
         String query = "SELECT Type_Name FROM INFORMATION_SCHEMA.COLUMNS WHERE Table_Name = '"
                 + tableName + "' AND Column_Name = '" + columnName + "'";
@@ -70,16 +68,5 @@ public class DropConstraintAction implements MigrationAction {
         } catch (SQLException e) {
             throw new RuntimeException("Error retrieving column type: " + e.getMessage(), e);
         }
-    }
-
-    private void deleteAutoIncrementConstraint(String tableName, String columnName, String columnType) {
-        Column tempColumn = new Column();
-        tempColumn.setName(columnName + "_temp");
-        tempColumn.setType(columnType);
-
-        new AddColumnAction(tableName, tempColumn).execute();
-
-        //migrating all data from main column to the temp one
-
     }
 }

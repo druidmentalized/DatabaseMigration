@@ -11,23 +11,21 @@ import java.sql.SQLException;
 
 public class DropIndexAction implements MigrationAction {
     private final static Logger logger = LoggerFactory.getLogger(DropIndexAction.class);
-    private final String tableName;
     private final Index index;
 
-    public DropIndexAction(String tableName, Index index) {
-        this.tableName = tableName;
+    public DropIndexAction(Index index) {
         this.index = index;
     }
 
     @Override
     public void execute() {
-        logger.info("Executing DropIndexAction on table {} with index {}", tableName, index.getName());
+        logger.info("Executing DropIndexAction on table {} with index {}", index.getTableName(), index.getName());
         String query = "DROP INDEX " + index.getName();
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
-            logger.info("Successfully dropped Index {} from table {}", index.getName(), tableName);
+            logger.info("Successfully dropped Index {} from table {}", index.getName(), index.getTableName());
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing DropIndexAction: " + e.getMessage(), e);
@@ -36,7 +34,7 @@ public class DropIndexAction implements MigrationAction {
 
     @Override
     public String generateChecksum() {
-        String string = "DropIndex: " + tableName + "|" + index;
+        String string = "DropIndex: " + index.getTableName() + "|" + index;
         return ChecksumGenerator.generateWithSHA256(string);
     }
 }

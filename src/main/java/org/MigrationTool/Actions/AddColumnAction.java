@@ -12,22 +12,22 @@ import java.sql.SQLException;
 
 public class AddColumnAction implements MigrationAction {
     private static final Logger logger = LoggerFactory.getLogger(AddColumnAction.class);
-    private final String tableName;
     private final Column column;
 
-    public AddColumnAction(String tableName, Column column) {
-        this.tableName = tableName;
+    public AddColumnAction(Column column) {
         this.column = column;
     }
 
     @Override
     public void execute() {
-        logger.info("Executing AddColumnAction on table: {}, column: {}", tableName, column.getName());
+        logger.info("Executing AddColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
 
         StringBuilder query = new StringBuilder("ALTER TABLE ")
-                .append(tableName)
+                .append(column.getTableName())
                 .append(" ADD COLUMN ")
-                .append(column);
+                .append(column.getName())
+                .append(" ")
+                .append(column.getType());
 
         //appending all unnamed constraints
         for (Constraint constraint : column.getConstraintsList()) {
@@ -45,26 +45,21 @@ public class AddColumnAction implements MigrationAction {
         }
         catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
-            throw new RuntimeException("Error executing AddColumnAction on table: " + tableName, e);
+            throw new RuntimeException("Error executing AddColumnAction on table: " + column.getTableName(), e);
         }
 
         //adding all named constraints
         for (Constraint constraint : column.getConstraintsList()) {
             if (constraint.isNamed()) {
-                new AddConstraintAction(tableName, constraint).execute();
+                new AddConstraintAction(constraint).execute();
             }
         }
     }
 
     @Override
     public String generateChecksum() {
-        StringBuilder stringBuilder = new StringBuilder();
-
         //creating specific signature
-        stringBuilder.append("AddColumn:").append(tableName).append("|");
-        stringBuilder.append(column);
-        column.getConstraintsList().forEach(stringBuilder::append);
-
-        return ChecksumGenerator.generateWithSHA256(stringBuilder.toString());
+        String string = "AddColumn:" + column.getTableName() + "|" + column;
+        return ChecksumGenerator.generateWithSHA256(string);
     }
 }

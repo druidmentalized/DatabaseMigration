@@ -11,24 +11,22 @@ import java.sql.SQLException;
 
 public class AddIndexAction implements MigrationAction {
     private final static Logger logger = LoggerFactory.getLogger(AddIndexAction.class);
-    private final String tableName;
     private final Index index;
 
-    public AddIndexAction(String tableName, Index index) {
-        this.tableName = tableName;
+    public AddIndexAction(Index index) {
         this.index = index;
     }
 
     @Override
     public void execute() {
-        logger.info("Executing AddIndexAction on table {}", tableName);
+        logger.info("Executing AddIndexAction on table {}", index.getTableName());
         String query = "CREATE " + (index.isUnique() ? "UNIQUE " : "") + "INDEX " + index.getName()
-                + " ON " + tableName + " (" + String.join(", ", index.getColumns()) + ");";
+                + " ON " + index.getTableName() + " (" + String.join(", ", index.getColumns()) + ");";
 
         try (Connection connection = DatabasePool.getDataSource().getConnection()) {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
-            logger.info("Successfully added Index {} to table {}", index.getName(), tableName);
+            logger.info("Successfully added Index {} to table {}", index.getName(), index.getTableName());
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing CreateIndexAction: " + e.getMessage(), e);
@@ -38,7 +36,7 @@ public class AddIndexAction implements MigrationAction {
 
     @Override
     public String generateChecksum() {
-        String string = "AddIndex: " + tableName + "|" + index;
+        String string = "AddIndex: " + index.getTableName() + "|" + index;
         return ChecksumGenerator.generateWithSHA256(string);
     }
 }

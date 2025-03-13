@@ -5,16 +5,23 @@ import java.util.List;
 
 public class Column {
     private String name;
+    private String tableName;
     private String type;
     private String newDataType;
-    private String newColumnName;
+    private String newName;
     private final List<Constraint> constraintsList = new ArrayList<>();
 
     public Column() {}
 
     @Override
     public String toString() {
-        return name + " " + type;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Column:").append(name).append("->")
+                .append(newDataType.isEmpty() ? "" : newDataType).append(newName.isEmpty() ? "" : "|")
+                .append(newName.isEmpty() ? "" : newName).append(newName.isEmpty() ? "" : "|");
+        constraintsList.forEach(constraint -> stringBuilder.append(constraint).append(" "));
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        return stringBuilder.toString();
     }
 
     public String getName() {
@@ -22,6 +29,13 @@ public class Column {
     }
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public String getType() {
@@ -42,10 +56,10 @@ public class Column {
         this.newDataType = newDataType;
     }
 
-    public String getNewColumnName() {
-        return newColumnName;
+    public String getNewName() {
+        return newName;
     }
-    public void setNewColumnName(String newColumnName) {
-        this.newColumnName = newColumnName;
+    public void setNewName(String newName) {
+        this.newName = newName;
     }
 }

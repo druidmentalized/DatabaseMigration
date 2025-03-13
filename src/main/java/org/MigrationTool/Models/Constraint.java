@@ -2,6 +2,7 @@ package org.MigrationTool.Models;
 
 public class Constraint {
     private String name;
+    private String tableName;
     private String columnName;
     private String expression;
     private ConstraintType type;
@@ -29,6 +30,13 @@ public class Constraint {
     }
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public String getColumnName() {

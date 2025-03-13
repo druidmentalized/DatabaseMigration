@@ -17,9 +17,9 @@ public class CreateTableAction implements MigrationAction {
     private final String tableName;
     private final List<Column> columns;
 
-    public CreateTableAction(String tableName, List<Column> columns) {
-        this.tableName = tableName;
+    public CreateTableAction(List<Column> columns) {
         this.columns = columns;
+        this.tableName = columns.getFirst().getTableName();
     }
 
     @Override
@@ -33,7 +33,7 @@ public class CreateTableAction implements MigrationAction {
         //adding columns with simple unnamed constraints
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            query.append(column);
+            query.append(column.getName()).append(" ").append(column.getType());
 
             for (Constraint constraint : column.getConstraintsList()) {
                 if (!constraint.isNamed()) {
@@ -61,7 +61,7 @@ public class CreateTableAction implements MigrationAction {
         for (Column column : columns) {
             for (Constraint constraint : column.getConstraintsList()) {
                 if (constraint.isNamed()) {
-                    new AddConstraintAction(tableName, constraint).execute();
+                    new AddConstraintAction(constraint).execute();
                 }
             }
         }
@@ -70,15 +70,10 @@ public class CreateTableAction implements MigrationAction {
     @Override
     public String generateChecksum() {
         StringBuilder stringBuilder = new StringBuilder();
-
-        //creating signature of this specific action
         stringBuilder.append("CreateTable:").append(tableName).append("|");
-        columns.stream()
-                .sorted(Comparator.comparing(Column::getName))
-                .forEach(column -> {
-                    stringBuilder.append(column);
-                    column.getConstraintsList().forEach(stringBuilder::append);
-                });
+        columns.forEach(column -> stringBuilder.append(column).append("|"));
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+
 
         return ChecksumGenerator.generateWithSHA256(stringBuilder.toString());
     }
