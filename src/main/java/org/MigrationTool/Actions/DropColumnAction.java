@@ -18,11 +18,11 @@ public class DropColumnAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing DropColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
         String query = "ALTER TABLE " + column.getTableName() + " DROP COLUMN " + column.getName() + ";";
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Successfully dropped column: {}", column.getName());

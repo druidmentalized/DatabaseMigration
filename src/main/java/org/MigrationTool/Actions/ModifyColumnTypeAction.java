@@ -17,13 +17,12 @@ public class ModifyColumnTypeAction implements MigrationAction {
         this.column = column;
     }
 
-
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing ModifyColumnTypeAction on table: {}, column: {}, new data type: {}", column.getTableName(), column.getName(), column.getNewDataType());
         String query = "ALTER TABLE " + column.getTableName() + " ALTER COLUMN " + column.getName() + " " + column.getNewDataType() + ";";
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Successfully modified type of column: {} to new data type: {}", column.getName(), column.getNewDataType());

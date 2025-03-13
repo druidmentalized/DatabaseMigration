@@ -34,7 +34,7 @@ public class MigrationHistory {
         return false;
     }
 
-    public void storeSuccessfulMigration(Migration migration) {
+    public void storeSuccessfulMigration(Migration migration, Connection connection) {
         StringBuilder query = new StringBuilder("INSERT INTO Migration_Table (migrationID, author, filename, checksum) VALUES ('");
         query.append(migration.getId()).append("', '");
         query.append(migration.getAuthor()).append("', '");
@@ -43,7 +43,7 @@ public class MigrationHistory {
 
         logger.info("Storing successful migration ID={}, Author={}", migration.getId(), migration.getAuthor());
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             connection.createStatement().execute(query.toString());
 
             logger.info("Migration ID={} stored successfully.", migration.getId());
@@ -53,12 +53,12 @@ public class MigrationHistory {
         }
     }
 
-    public void deleteRolledBackMigration(Migration migration) {
+    public void deleteRolledBackMigration(Migration migration, Connection connection) {
         String query = "DELETE FROM Migration_Table WHERE Checksum = '" + migration.getChecksum() + "';";
 
         logger.info("Rolling back migration ID={}", migration.getId());
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             connection.createStatement().execute(query);
 
             logger.info("Migration ID={} removed from history.", migration.getId());

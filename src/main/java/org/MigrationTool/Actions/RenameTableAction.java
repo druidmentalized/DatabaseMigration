@@ -19,11 +19,11 @@ public class RenameTableAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Renaming table {} to {}", tableName, newTableName);
         String query = "ALTER TABLE " + tableName + " RENAME TO " + newTableName;
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Table {} successfully renamed", newTableName);

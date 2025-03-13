@@ -18,12 +18,12 @@ public class AddIndexAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing AddIndexAction on table {}", index.getTableName());
         String query = "CREATE " + (index.isUnique() ? "UNIQUE " : "") + "INDEX " + index.getName()
                 + " ON " + index.getTableName() + " (" + String.join(", ", index.getColumns()) + ");";
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Successfully added Index {} to table {}", index.getName(), index.getTableName());

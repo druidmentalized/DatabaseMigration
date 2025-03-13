@@ -18,11 +18,11 @@ public class RenameColumnAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing RenameColumnAction on table '{}', to rename column '{}' to '{}'", column.getTableName(), column.getName(), column.getNewName());
         String query = "ALTER TABLE " + column.getTableName() + " RENAME COLUMN " + column.getName() + " TO " + column.getNewName();
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Renamed column '{}' to '{}'", column.getName(), column.getNewName());

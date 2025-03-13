@@ -19,7 +19,7 @@ public class AddColumnAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing AddColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
 
         StringBuilder query = new StringBuilder("ALTER TABLE ")
@@ -38,7 +38,7 @@ public class AddColumnAction implements MigrationAction {
 
         query.append(";");
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
             logger.info("Column '{}' added successfully.", column.getName());
@@ -51,7 +51,7 @@ public class AddColumnAction implements MigrationAction {
         //adding all named constraints
         for (Constraint constraint : column.getConstraintsList()) {
             if (constraint.isNamed()) {
-                new AddConstraintAction(constraint).execute();
+                new AddConstraintAction(constraint).execute(connection);
             }
         }
     }

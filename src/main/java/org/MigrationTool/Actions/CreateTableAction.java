@@ -23,7 +23,7 @@ public class CreateTableAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing CreateTableAction on table: {}", tableName);
 
         StringBuilder query = new StringBuilder("CREATE TABLE ")
@@ -48,7 +48,7 @@ public class CreateTableAction implements MigrationAction {
 
         query.append(");");
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
             logger.info("Table '{}' successfully created", tableName);
@@ -61,7 +61,7 @@ public class CreateTableAction implements MigrationAction {
         for (Column column : columns) {
             for (Constraint constraint : column.getConstraintsList()) {
                 if (constraint.isNamed()) {
-                    new AddConstraintAction(constraint).execute();
+                    new AddConstraintAction(constraint).execute(connection);
                 }
             }
         }

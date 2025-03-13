@@ -18,11 +18,11 @@ public class DropIndexAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing DropIndexAction on table {} with index {}", index.getTableName(), index.getName());
         String query = "DROP INDEX " + index.getName();
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Successfully dropped Index {} from table {}", index.getName(), index.getTableName());

@@ -15,8 +15,8 @@ public class Main {
             logger.info("Migration history table initialized successfully.");
 
             logger.info("Executing migrations...");
-            new MigrationExecutor().executeMigrations();
-            //new MigrationExecutor().rollbackMigrations(5);
+            //new MigrationExecutor().executeMigrations();
+            new MigrationExecutor().rollbackMigrations(5);
             logger.info("Migration execution completed successfully.");
         } catch (Exception e) {
             logger.error("MigrationTool encountered a fatal error: {}", e.getMessage(), e);

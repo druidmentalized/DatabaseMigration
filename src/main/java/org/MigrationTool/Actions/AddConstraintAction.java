@@ -18,7 +18,7 @@ public class AddConstraintAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing AddConstraint on table {} with constraint {}", constraint.getTableName(), constraint);
 
         String query;
@@ -30,7 +30,7 @@ public class AddConstraintAction implements MigrationAction {
             query = String.format("ALTER TABLE %s ALTER COLUMN %s SET %s;", constraint.getTableName(), constraint.getColumnName(), constraint);
         }
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Constraint '{}' successfully added", constraint.getTableName());

@@ -17,11 +17,11 @@ public class DropTableAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         logger.info("Executing DropTableAction on table: {}", tableName);
         String query = "DROP TABLE " + tableName + ";";
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             logger.debug("SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Successfully dropped table: {}", tableName);

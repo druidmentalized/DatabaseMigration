@@ -21,7 +21,7 @@ public class DropConstraintAction implements MigrationAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         String query = "";
 
         if (constraint.isNamed()) {
@@ -38,7 +38,7 @@ public class DropConstraintAction implements MigrationAction {
             return;
         }
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             connection.createStatement().execute(query);
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
