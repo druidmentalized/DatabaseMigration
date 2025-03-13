@@ -5,8 +5,9 @@ import org.MigrationTool.Main.Migration;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraint;
 import org.MigrationTool.Models.ConstraintType;
+import org.MigrationTool.Models.Index;
 import org.MigrationTool.Utils.AttributeNames;
-import org.MigrationTool.Utils.ConstraintNameGenerator;
+import org.MigrationTool.Utils.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
@@ -119,16 +120,24 @@ public class MigrationParser {
                 return new AddConstraintAction(tableName, column.getConstraintsList().getFirst());
             }
             case "addIndex" -> {
+                //parsing index
+                Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
 
-            }
-            case "addForeignKey" -> {
+                Index index = parseIndex(indexElement, tableName);
 
+                return new AddIndexAction(tableName, index);
             }
             case "renameTable" -> {
+                String newTableName = actionElement.getAttribute(AttributeNames.newTableName);
 
+                return new RenameTableAction(tableName, newTableName);
             }
             case "renameColumn" -> {
+                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
 
+                Column column = parseColumn(columnElement, tableName);
+
+                return new RenameColumnAction(tableName, column.getName(), column.getNewColumnName());
             }
             case "modifyColumnType" -> {
                 //parsing single column
@@ -157,13 +166,14 @@ public class MigrationParser {
                 return new DropConstraintAction(tableName, column.getConstraintsList().getFirst());
             }
             case "dropIndex" -> {
+                //parsing index
+                Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
 
-            }
-            case "dropForeignKey" -> {
+                Index index = parseIndex(indexElement, tableName);
 
+                return new DropIndexAction(tableName, index);
             }
             default -> logger.error("Unsupported action type: {}", actionType);
-            //todo: add some more as an additional task
         }
         return null;
     }
@@ -194,6 +204,7 @@ public class MigrationParser {
         column.setName(parseStringOrDefault(columnElement, AttributeNames.columnName, ""));
         column.setType(parseStringOrDefault(columnElement, AttributeNames.columnType, ""));
         column.setNewDataType(parseStringOrDefault(columnElement, AttributeNames.newDataType, ""));
+        column.setNewColumnName(parseStringOrDefault(columnElement, AttributeNames.newColumnName, ""));
 
         NodeList constraintsNodes = columnElement.getElementsByTagName("constraint");
         for (int i = 0; i < constraintsNodes.getLength(); i++) {
@@ -211,6 +222,25 @@ public class MigrationParser {
         return column;
     }
 
+    private Index parseIndex(Element indexElement, String tableName) {
+        Index index = new Index();
+        index.setUnique(parseBooleanOrDefault(indexElement, AttributeNames.indexUniqueness, false));
+
+        List<String> columnNames = index.getColumns();
+        NodeList columnNodes = indexElement.getElementsByTagName("column");
+        for (int i = 0; i < columnNodes.getLength(); i++) {
+            String columnName = parseStringOrDefault((Element) columnNodes.item(i), AttributeNames.columnName, "");
+
+            if (!columnName.isEmpty()) {
+                columnNames.add(columnName);
+            }
+        }
+
+        index.setName(NameGenerator.generateIndexName(tableName, columnNames));
+
+        return index;
+    }
+
     private Constraint parseConstraint(Element constraintElement, String tableName, String columnName) {
         Constraint constraint = new Constraint();
 
@@ -220,7 +250,7 @@ public class MigrationParser {
             constraint.setType(type);
 
             //generating name
-            String name = ConstraintNameGenerator.generateConstraintName(tableName, columnName, type.toString());
+            String name = NameGenerator.generateConstraintName(tableName, columnName, type.toString());
             constraint.setName(name);
 
             constraint.setExpression(parseStringOrDefault(constraintElement, AttributeNames.expression, ""));
@@ -242,4 +272,10 @@ public class MigrationParser {
         return defaultValue;
     }
 
+    private boolean parseBooleanOrDefault(Element element, String attributeName, boolean defaultValue) {
+        if (element.hasAttribute(attributeName)) {
+            return Boolean.parseBoolean(element.getAttribute(attributeName));
+        }
+        return defaultValue;
+    }
 }

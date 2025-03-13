@@ -13,10 +13,10 @@ public class Constraint {
         return switch (type) {
             case AUTO_INCREMENT -> "AUTO_INCREMENT";
             case NOT_NULL -> "NOT NULL";
-            case CHECK -> String.format("CONSTRAINT %s CHECK (%s)", name, expression);
-            case FOREIGN_KEY -> String.format("CONSTRAINT %s FOREIGN KEY (%s)", name, columnName);
-            case UNIQUE -> String.format("CONSTRAINT %s UNIQUE (%s)", name, columnName);
-            case PRIMARY_KEY -> String.format("CONSTRAINT %s PRIMARY KEY (%s)", name, columnName);
+            case CHECK -> String.format("%s CHECK (%s)", name, expression);
+            case FOREIGN_KEY -> String.format("%s FOREIGN KEY (%s) REFERENCES %s", name, columnName, expression);
+            case UNIQUE -> String.format("%s UNIQUE (%s)", name, columnName);
+            case PRIMARY_KEY -> String.format("%s PRIMARY KEY (%s)", name, columnName);
         };
     }
 

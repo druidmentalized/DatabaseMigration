@@ -7,13 +7,10 @@ public class Column {
     private String name;
     private String type;
     private String newDataType;
+    private String newColumnName;
     private final List<Constraint> constraintsList = new ArrayList<>();
 
-    public Column() {
-        this.name = "";
-        this.type = "";
-        this.newDataType = "";
-    }
+    public Column() {}
 
     @Override
     public String toString() {
@@ -43,5 +40,12 @@ public class Column {
     }
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
+    }
+
+    public String getNewColumnName() {
+        return newColumnName;
+    }
+    public void setNewColumnName(String newColumnName) {
+        this.newColumnName = newColumnName;
     }
 }

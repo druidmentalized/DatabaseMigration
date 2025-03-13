@@ -99,61 +99,115 @@
         </createTable>
 
         <rollback>
-            <dropTable tableName ="sweets"/>
-        </rollback>
-    </migration>
-
-
-    <migration id="7" author="dmitriy">
-        <dropTable tableName="sweets"/>
-
-        <rollback>
-            <createTable tableName ="sweets">
-                <column columnName="id" columnType="int">
-                    <constraint type="auto_increment"/>
-                    <constraint type="primary_key"/>
-                    <constraint type="not_null"/>
-                </column>
-                <column columnName="sweetness" columnType="int">
-                    <constraint type="not_null"/>
-                </column>
-            </createTable>
-        </rollback>
-    </migration>
-
-    <migration id="8" author="dmitriy">
-        <createTable tableName="sweets">
-            <column columnName="id" columnType="int">
-                <constraint type="auto_increment"/>
-                <constraint type="primary_key"/>
-                <constraint type="not_null"/>
-            </column>
-            <column columnName="sweetness" columnType="int">
-                <constraint type="not_null"/>
-            </column>
-        </createTable>
-
-        <rollback>
             <dropTable tableName="sweets"/>
         </rollback>
     </migration>
 
-    <migration id="9" author="dmitriy">
-        <createTable tableName="jobs">
-            <column columnName="id" columnType="int">
-                <constraint type="auto_increment"/>
-                <constraint type="primary_key"/>
+    <migration id="7" author="mitya">
+        <addColumn tableName="sweets">
+            <column columnName="batch" columnType="int">
                 <constraint type="not_null"/>
+                <constraint type="unique"/>
             </column>
-            <column columnName="name" columnType="varchar(255)">
-                <constraints type="not_null"/>
-            </column>
-        </createTable>
+        </addColumn>
 
         <rollback>
-            <dropTable tableName="jobs"/>
+            <dropColumn tableName="sweets">
+                <column columnName="batch"/>
+            </dropColumn>
+        </rollback>
+    </migration>
+
+    <migration id="8" author="mitya">
+        <dropConstraint tableName="sweets">
+            <column columnName="batch">
+                <constraint type="unique"/>
+            </column>
+        </dropConstraint>
+
+        <rollback>
+            <addConstraint tableName="sweets">
+                <column columnName="batch">
+                    <constraint type="unique"/>
+                </column>
+            </addConstraint>
+        </rollback>
+    </migration>
+
+    <migration id="9" author="randomguy">
+        <dropConstraint tableName="sweets">
+            <column columnName="batch">
+                <constraint type="not_null"/>
+            </column>
+        </dropConstraint>
+
+        <rollback>
+            <addConstraint tableName="sweets">
+                <column columnName="batch">
+                    <constraint type="not_null"/>
+                </column>
+            </addConstraint>
+        </rollback>
+    </migration>
+
+    <migration id="10" author="randomguy">
+        <addColumn tableName="sweets">
+            <column columnName="userId" columnType="int">
+                <constraint type="not_null"/>
+            </column>
+        </addColumn>
+
+        <addConstraint tableName="sweets">
+            <column columnName="userId">
+                <constraint type="foreign_key" expression="users(id)"/>
+            </column>
+        </addConstraint>
+
+        <rollback>
+            <dropConstraint tableName="sweets">
+                <column columnName="userID">
+                    <constraint type="foreign_key"/>
+                </column>
+            </dropConstraint>
+            <dropColumn tableName="sweets">
+                <column columnName="userId"/>
+            </dropColumn>
+        </rollback>
+    </migration>
+
+    <migration id="11" author="randomguy">
+        <renameTable tableName="sweets" newTableName="yummySweets"/>
+
+        <rollback>
+            <renameTable tableName="yummySweets" newTableName="sweets"/>
+        </rollback>
+    </migration>
+
+    <migration id="12" author="randomguy">
+        <renameColumn tableName="yummySweets">
+            <column columnName="batch" newColumnName="series"/>
+        </renameColumn>
+
+        <rollback>
+            <renameColumn tableName="yummySweets">
+                <column columnName="series" newColumnName="batch"/>
+            </renameColumn>
+        </rollback>
+    </migration>
+
+    <migration id="13" author="randomguy">
+        <addIndex tableName="yummySweets">
+            <index uniqueness="false">
+                <column columnName="sweetness"/>
+            </index>
+        </addIndex>
+
+        <rollback>
+            <dropIndex tableName="yummySweets">
+                <index>
+                    <column columnName="sweetness"/>
+                </index>
+            </dropIndex>
         </rollback>
     </migration>
 </migrations>
-
-

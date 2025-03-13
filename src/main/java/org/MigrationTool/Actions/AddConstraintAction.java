@@ -26,7 +26,7 @@ public class AddConstraintAction implements MigrationAction {
         String query;
 
         if (constraint.isNamed()) {
-            query = String.format("ALTER TABLE %s ADD %s;", tableName, constraint);
+            query = String.format("ALTER TABLE %s ADD CONSTRAINT %s;", tableName, constraint);
         }
         else {
             query = String.format("ALTER TABLE %s ALTER COLUMN %s SET %s;", tableName, constraint.getColumnName(), constraint);
@@ -45,8 +45,8 @@ public class AddConstraintAction implements MigrationAction {
     @Override
     public String generateChecksum() {
         //creating special signature
-        String stringBuilder = "AddNamedConstraint:" + tableName + "|" + constraint;
+        String string = "AddConstraint:" + tableName + "|" + constraint;
 
-        return ChecksumGenerator.generateWithSHA256(stringBuilder);
+        return ChecksumGenerator.generateWithSHA256(string);
     }
 }

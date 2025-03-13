@@ -4,6 +4,7 @@ import org.MigrationTool.Database.DatabasePool;
 import org.MigrationTool.Models.Column;
 import org.MigrationTool.Models.Constraint;
 import org.MigrationTool.Models.ConstraintType;
+import org.MigrationTool.Utils.ChecksumGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,8 @@ public class DropConstraintAction implements MigrationAction {
 
     @Override
     public String generateChecksum() {
-        return "";
+        String string = "DropConstraint: " + tableName + "|" + constraint;
+        return ChecksumGenerator.generateWithSHA256(string);
     }
 
     //helper

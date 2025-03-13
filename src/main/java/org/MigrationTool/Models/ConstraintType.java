@@ -6,5 +6,5 @@ public enum ConstraintType {
     UNIQUE,
     NOT_NULL,
     CHECK,
-    FOREIGN_KEY
+    FOREIGN_KEY,
 }

@@ -1,4 +1,44 @@
 package org.MigrationTool.Actions;
 
-public class AddIndexAction {
+import org.MigrationTool.Database.DatabasePool;
+import org.MigrationTool.Models.Index;
+import org.MigrationTool.Utils.ChecksumGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+public class AddIndexAction implements MigrationAction {
+    private final static Logger logger = LoggerFactory.getLogger(AddIndexAction.class);
+    private final String tableName;
+    private final Index index;
+
+    public AddIndexAction(String tableName, Index index) {
+        this.tableName = tableName;
+        this.index = index;
+    }
+
+    @Override
+    public void execute() {
+        logger.info("Executing AddIndexAction on table {}", tableName);
+        String query = "CREATE " + (index.isUnique() ? "UNIQUE " : "") + "INDEX " + index.getName()
+                + " ON " + tableName + " (" + String.join(", ", index.getColumns()) + ");";
+
+        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+            logger.debug("SQL Query: {}", query);
+            connection.createStatement().execute(query);
+            logger.info("Successfully added Index {} to table {}", index.getName(), tableName);
+        } catch (SQLException e) {
+            logger.error("SQL Exception: {}", e.getMessage());
+            throw new RuntimeException("Error executing CreateIndexAction: " + e.getMessage(), e);
+        }
+
+    }
+
+    @Override
+    public String generateChecksum() {
+        String string = "AddIndex: " + tableName + "|" + index;
+        return ChecksumGenerator.generateWithSHA256(string);
+    }
 }
