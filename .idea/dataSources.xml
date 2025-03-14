@@ -4,6 +4,7 @@
     <data-source source="LOCAL" name="database" uuid="093228dd-3cdb-4b5a-bc62-2f2c2ae76fd7">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
+      <auto-commit>false</auto-commit>
       <jdbc-driver>org.h2.Driver</jdbc-driver>
       <jdbc-url>jdbc:h2:$PROJECT_DIR$/src/main/resources/database/database</jdbc-url>
       <jdbc-additional-properties>

@@ -19,13 +19,13 @@ public class DropColumnAction implements MigrationAction {
 
     @Override
     public void execute(Connection connection) {
-        logger.info("Executing DropColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
+        logger.debug("       Executing DropColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
         String query = "ALTER TABLE " + column.getTableName() + " DROP COLUMN " + column.getName() + ";";
 
         try {
-            logger.debug("SQL Query: {}", query);
+            logger.debug("          └── SQL Query: {}", query);
             connection.createStatement().execute(query);
-            logger.info("Successfully dropped column: {}", column.getName());
+            logger.info("Dropped column: {}", column.getName());
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing DropColumnAction on table: " + column.getTableName() + ", column: " + column.getName(), e);

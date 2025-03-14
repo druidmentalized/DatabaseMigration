@@ -19,14 +19,14 @@ public class AddIndexAction implements MigrationAction {
 
     @Override
     public void execute(Connection connection) {
-        logger.info("Executing AddIndexAction on table {}", index.getTableName());
+        logger.debug("       Executing AddIndexAction on table {}", index.getTableName());
         String query = "CREATE " + (index.isUnique() ? "UNIQUE " : "") + "INDEX " + index.getName()
                 + " ON " + index.getTableName() + " (" + String.join(", ", index.getColumns()) + ");";
 
         try {
-            logger.debug("SQL Query: {}", query);
+            logger.debug("          └── SQL Query: {}", query);
             connection.createStatement().execute(query);
-            logger.info("Successfully added Index {} to table {}", index.getName(), index.getTableName());
+            logger.info("Added Index {} to table {}", index.getName(), index.getTableName());
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing CreateIndexAction: " + e.getMessage(), e);

@@ -20,6 +20,7 @@ public class DatabasePool {
         config.setUsername(ConfigLoader.getProperty("database.user"));
         config.setPassword(ConfigLoader.getProperty("database.password"));
         config.setMaximumPoolSize(10);
+        config.setAutoCommit(false);
         config.setDriverClassName("org.h2.Driver");
 
         dataSource = new HikariDataSource(config);

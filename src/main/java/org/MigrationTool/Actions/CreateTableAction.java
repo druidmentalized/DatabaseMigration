@@ -24,7 +24,7 @@ public class CreateTableAction implements MigrationAction {
 
     @Override
     public void execute(Connection connection) {
-        logger.info("Executing CreateTableAction on table: {}", tableName);
+        logger.debug("       Executing CreateTableAction on table: {}", tableName);
 
         StringBuilder query = new StringBuilder("CREATE TABLE ")
                 .append(tableName)
@@ -49,9 +49,9 @@ public class CreateTableAction implements MigrationAction {
         query.append(");");
 
         try {
-            logger.debug("SQL Query: {}", query);
+            logger.debug("          └── SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
-            logger.info("Table '{}' successfully created", tableName);
+            logger.info("Table '{}' created", tableName);
         } catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());
             throw new RuntimeException("Error executing CreateTableAction for table: " + tableName, e);

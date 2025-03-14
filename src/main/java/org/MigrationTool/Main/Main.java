@@ -14,10 +14,25 @@ public class Main {
             MigrationTableInitializer.initialize();
             logger.info("Migration history table initialized successfully.");
 
-            logger.info("Executing migrations...");
-            //new MigrationExecutor().executeMigrations();
-            new MigrationExecutor().rollbackMigrations(5);
-            logger.info("Migration execution completed successfully.");
+
+            //todo: split these two parts
+            logger.info("===========================================");
+            logger.info("     STARTING MIGRATION EXECUTION");
+            logger.info("===========================================");
+            logger.info("");
+            new MigrationExecutor().executeMigrations();
+
+/*            logger.info("===========================================");
+            logger.info("     STARTING ROLLBACK EXECUTION");
+            logger.info("===========================================");
+            logger.info("");
+            new MigrationExecutor().rollbackMigrations(0);*/
+
+
+            logger.info("");
+            logger.info("===========================================");
+            logger.info("    EXECUTION COMPLETED SUCCESSFULLY");
+            logger.info("===========================================");
         } catch (Exception e) {
             logger.error("MigrationTool encountered a fatal error: {}", e.getMessage(), e);
             System.exit(1);

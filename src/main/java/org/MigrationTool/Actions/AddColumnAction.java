@@ -20,7 +20,7 @@ public class AddColumnAction implements MigrationAction {
 
     @Override
     public void execute(Connection connection) {
-        logger.info("Executing AddColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
+        logger.debug("       Executing AddColumnAction on table: {}, column: {}", column.getTableName(), column.getName());
 
         StringBuilder query = new StringBuilder("ALTER TABLE ")
                 .append(column.getTableName())
@@ -39,9 +39,9 @@ public class AddColumnAction implements MigrationAction {
         query.append(";");
 
         try {
-            logger.debug("SQL Query: {}", query);
+            logger.debug("          └── SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
-            logger.info("Column '{}' added successfully.", column.getName());
+            logger.info("Column '{}' added.", column.getName());
         }
         catch (SQLException e) {
             logger.error("SQL Exception: {}", e.getMessage());

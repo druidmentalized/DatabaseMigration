@@ -12,12 +12,12 @@ import java.sql.SQLException;
 public class MigrationHistory {
     private static final Logger logger = LoggerFactory.getLogger(MigrationHistory.class);
 
-    public boolean alreadyExecuted(Migration migration) {
+    public boolean alreadyExecuted(Migration migration, Connection connection) {
         String query = "SELECT COUNT(*) FROM Migration_Table WHERE Checksum = '" + migration.getChecksum() + "'";
 
         logger.debug("Checking if migration ID={} has already been executed.", migration.getId());
 
-        try (Connection connection = DatabasePool.getDataSource().getConnection()) {
+        try {
             ResultSet resultSet = connection.createStatement().executeQuery(query);
 
             if (resultSet.next()) {
@@ -41,12 +41,13 @@ public class MigrationHistory {
         query.append(ConfigLoader.getProperty("migration.file")).append("', '");
         query.append(migration.getChecksum()).append("')");
 
-        logger.info("Storing successful migration ID={}, Author={}", migration.getId(), migration.getAuthor());
+        logger.info("Storing migration ID={}, Author={}", migration.getId(), migration.getAuthor());
 
         try {
+            logger.debug("   └── SQL Query: {}", query);
             connection.createStatement().execute(query.toString());
 
-            logger.info("Migration ID={} stored successfully.", migration.getId());
+            logger.info("Migration ID={} stored.", migration.getId());
         } catch (SQLException e) {
             logger.error("Failed to store migration ID={}: {}", migration.getId(), e.getMessage());
             throw new RuntimeException("Storing migration in history failed: " + e.getMessage(), e);
@@ -59,6 +60,7 @@ public class MigrationHistory {
         logger.info("Rolling back migration ID={}", migration.getId());
 
         try {
+            logger.debug("  └── SQL Query: {}", query);
             connection.createStatement().execute(query);
 
             logger.info("Migration ID={} removed from history.", migration.getId());

@@ -20,11 +20,11 @@ public class RenameTableAction implements MigrationAction {
 
     @Override
     public void execute(Connection connection) {
-        logger.info("Renaming table {} to {}", tableName, newTableName);
+        logger.debug("       Renaming table {} to {}", tableName, newTableName);
         String query = "ALTER TABLE " + tableName + " RENAME TO " + newTableName;
 
         try {
-            logger.debug("SQL Query: {}", query);
+            logger.debug("          └── SQL Query: {}", query);
             connection.createStatement().execute(query);
             logger.info("Table {} successfully renamed", newTableName);
         } catch (SQLException e) {
