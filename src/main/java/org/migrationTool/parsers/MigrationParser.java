@@ -95,88 +95,87 @@ public class MigrationParser {
     private MigrationAction parseAction(Element actionElement) {
         String actionType = actionElement.getTagName();
         String tableName = actionElement.getAttribute(AttributeNames.tableName);
-        logger.debug("   └── Parsing action: Type={}, Table={} ", actionType, tableName);
+        logger.debug("   └── Parsing action: Type={}, Table={}", actionType, tableName);
 
-        switch (actionType) {
-            case "createTable" -> {
-                List<Column> columns = new ArrayList<>();
-                NodeList columnNodes = actionElement.getElementsByTagName("column");
-                for (int i = 0; i < columnNodes.getLength(); i++) {
-                    Element columnElement = (Element) columnNodes.item(i);
-
-                    columns.add(parseColumn(columnElement, tableName));
-                }
-
-                return new CreateTableAction(columns);
+        return switch (actionType) {
+            case "createTable"      -> parseCreateTableAction(actionElement, tableName);
+            case "addColumn"        -> parseAddColumnAction(actionElement, tableName);
+            case "addConstraint"    -> parseAddConstraintAction(actionElement, tableName);
+            case "addIndex"         -> parseAddIndexAction(actionElement, tableName);
+            case "renameTable"      -> parseRenameTableAction(actionElement, tableName);
+            case "renameColumn"     -> parseRenameColumnAction(actionElement, tableName);
+            case "modifyColumnType" -> parseModifyColumnTypeAction(actionElement, tableName);
+            case "dropColumn"       -> parseDropColumnAction(actionElement, tableName);
+            case "dropTable"        -> new DropTableAction(tableName);
+            case "dropConstraint"   -> parseDropConstraintAction(actionElement, tableName);
+            case "dropIndex"        -> parseDropIndexAction(actionElement, tableName);
+            default -> {
+                logger.error("Unsupported action type: {}", actionType);
+                yield null;
             }
-            case "addColumn" -> {
-                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        };
+    }
 
-                Column column = parseColumn(columnElement, tableName);
-
-                return new AddColumnAction(column);
-            }
-            case "addConstraint" -> {
-                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
-
-                Column column = parseColumn(columnElement, tableName);
-
-                return new AddConstraintAction(column.getConstraintsList().getFirst());
-            }
-            case "addIndex" -> {
-                Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
-
-                Index index = parseIndex(indexElement, tableName);
-
-                return new AddIndexAction(index);
-            }
-            case "renameTable" -> {
-                String newTableName = actionElement.getAttribute(AttributeNames.newTableName);
-
-                return new RenameTableAction(tableName, newTableName);
-            }
-            case "renameColumn" -> {
-                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
-
-                Column column = parseColumn(columnElement, tableName);
-
-                return new RenameColumnAction(column);
-            }
-            case "modifyColumnType" -> {
-                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
-
-                Column column = parseColumn(columnElement, tableName);
-
-                return new ModifyColumnTypeAction(column);
-            }
-            case "dropColumn" -> {
-                //parsing single column
-                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
-
-                Column column = parseColumn(columnElement, tableName);
-
-                return new DropColumnAction(column);
-            }
-            case "dropTable" -> {
-                return new DropTableAction(tableName);
-            }
-            case "dropConstraint" -> {
-                Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
-
-                Column column = parseColumn(columnElement, tableName);
-
-                return new DropConstraintAction(column.getConstraintsList().getFirst());
-            }
-            case "dropIndex" -> {
-                Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
-
-                Index index = parseIndex(indexElement, tableName);
-
-                return new DropIndexAction(index);
-            }
-            default -> logger.error("Unsupported action type: {}", actionType);
+    private MigrationAction parseCreateTableAction(Element actionElement, String tableName) {
+        List<Column> columns = new ArrayList<>();
+        NodeList columnNodes = actionElement.getElementsByTagName("column");
+        for (int i = 0; i < columnNodes.getLength(); i++) {
+            columns.add(parseColumn((Element) columnNodes.item(i), tableName));
         }
-        return null;
+        return new CreateTableAction(columns);
+    }
+
+    private MigrationAction parseAddColumnAction(Element actionElement, String tableName) {
+        Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        Column column = parseColumn(columnElement, tableName);
+        return new AddColumnAction(column);
+    }
+
+    private MigrationAction parseAddConstraintAction(Element actionElement, String tableName) {
+        Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        Column column = parseColumn(columnElement, tableName);
+        return new AddConstraintAction(column.getConstraintsList().getFirst());
+    }
+
+    private MigrationAction parseAddIndexAction(Element actionElement, String tableName) {
+        Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
+        Index index = parseIndex(indexElement, tableName);
+        return new AddIndexAction(index);
+    }
+
+    private MigrationAction parseRenameTableAction(Element actionElement, String tableName) {
+        String newTableName = actionElement.getAttribute(AttributeNames.newTableName);
+        return new RenameTableAction(tableName, newTableName);
+    }
+
+    private MigrationAction parseRenameColumnAction(Element actionElement, String tableName) {
+        Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        Column column = parseColumn(columnElement, tableName);
+        return new RenameColumnAction(column);
+    }
+
+    private MigrationAction parseModifyColumnTypeAction(Element actionElement, String tableName) {
+        Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        Column column = parseColumn(columnElement, tableName);
+        return new ModifyColumnTypeAction(column);
+    }
+
+    private MigrationAction parseDropColumnAction(Element actionElement, String tableName) {
+        Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        Column column = parseColumn(columnElement, tableName);
+        return new DropColumnAction(column);
+    }
+
+    private MigrationAction parseDropConstraintAction(Element actionElement, String tableName) {
+        Element columnElement = (Element) actionElement.getElementsByTagName("column").item(0);
+        Column column = parseColumn(columnElement, tableName);
+        return new DropConstraintAction(column.getConstraintsList().getFirst());
+    }
+
+    private MigrationAction parseDropIndexAction(Element actionElement, String tableName) {
+        Element indexElement = (Element) actionElement.getElementsByTagName("index").item(0);
+        Index index = parseIndex(indexElement, tableName);
+        return new DropIndexAction(index);
     }
 
     private List<MigrationAction> parseActions(NodeList rollbackActionNodes) {
