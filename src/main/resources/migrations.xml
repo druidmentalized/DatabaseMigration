@@ -2,25 +2,25 @@
     <migration id="1" author="dmitriy">
         <createTable tableName="users">
             <column columnName="id" columnType="int">
-                <constraint type="auto_increment"/>
-                <constraint type="primary_key"/>
-                <constraint type="not_null"/>
+                <constraint constraintType="auto_increment"/>
+                <constraint constraintType="primary_key"/>
+                <constraint constraintType="not_null"/>
             </column>
             <column columnName="name" columnType="varchar(100)">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
             <column columnName="surname" columnType="varchar(100)">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
             <column columnName="birthdate" columnType="timestamp">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
         </createTable>
 
         <addColumn tableName="users">
             <column columnName="address" columnType="varchar(100)">
-                <constraint type="unique"/>
-                <constraint type="not_null"/>
+                <constraint constraintType="unique"/>
+                <constraint constraintType="not_null"/>
             </column>
         </addColumn>
 
@@ -35,7 +35,7 @@
     <migration id="2" author="dmitriy">
         <addColumn tableName="users">
             <column columnName="email" columnType="varchar(100)">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
         </addColumn>
 
@@ -49,7 +49,7 @@
     <migration id="3" author="dmitriy">
         <addColumn tableName="users">
             <column columnName="height" columnType="int">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
         </addColumn>
 
@@ -80,7 +80,7 @@
         <rollback>
             <addColumn tableName="users">
                 <column columnName="email" columnType="varchar(100)">
-                    <constraint type="not_null"/>
+                    <constraint constraintType="not_null"/>
                 </column>
             </addColumn>
         </rollback>
@@ -89,12 +89,12 @@
     <migration id="6" author="dmitriy">
         <createTable tableName="sweets">
             <column columnName="id" columnType="int">
-                <constraint type="auto_increment"/>
-                <constraint type="primary_key"/>
-                <constraint type="not_null"/>
+                <constraint constraintType="auto_increment"/>
+                <constraint constraintType="primary_key"/>
+                <constraint constraintType="not_null"/>
             </column>
             <column columnName="sweetness" columnType="int">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
         </createTable>
 
@@ -106,8 +106,8 @@
     <migration id="7" author="mitya">
         <addColumn tableName="sweets">
             <column columnName="batch" columnType="int">
-                <constraint type="not_null"/>
-                <constraint type="unique"/>
+                <constraint constraintType="not_null"/>
+                <constraint constraintType="unique"/>
             </column>
         </addColumn>
 
@@ -121,14 +121,14 @@
     <migration id="8" author="mitya">
         <dropConstraint tableName="sweets">
             <column columnName="batch">
-                <constraint type="unique"/>
+                <constraint constraintType="unique"/>
             </column>
         </dropConstraint>
 
         <rollback>
             <addConstraint tableName="sweets">
                 <column columnName="batch">
-                    <constraint type="unique"/>
+                    <constraint constraintType="unique"/>
                 </column>
             </addConstraint>
         </rollback>
@@ -137,14 +137,14 @@
     <migration id="9" author="randomguy">
         <dropConstraint tableName="sweets">
             <column columnName="batch">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
         </dropConstraint>
 
         <rollback>
             <addConstraint tableName="sweets">
                 <column columnName="batch">
-                    <constraint type="not_null"/>
+                    <constraint constraintType="not_null"/>
                 </column>
             </addConstraint>
         </rollback>
@@ -153,20 +153,20 @@
     <migration id="10" author="randomguy">
         <addColumn tableName="sweets">
             <column columnName="userId" columnType="int">
-                <constraint type="not_null"/>
+                <constraint constraintType="not_null"/>
             </column>
         </addColumn>
 
         <addConstraint tableName="sweets">
             <column columnName="userId">
-                <constraint type="foreign_key" expression="users(id)"/>
+                <constraint constraintType="foreign_key" expression="users(id)"/>
             </column>
         </addConstraint>
 
         <rollback>
             <dropConstraint tableName="sweets">
                 <column columnName="userID">
-                    <constraint type="foreign_key"/>
+                    <constraint constraintType="foreign_key"/>
                 </column>
             </dropConstraint>
             <dropColumn tableName="sweets">
